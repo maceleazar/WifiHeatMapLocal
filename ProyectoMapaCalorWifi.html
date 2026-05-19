@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mapa de Calor WiFi Local</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      background: #111827;
+      border-right: 1px solid #334155;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .section {
+      margin-bottom: 18px;
+      padding: 14px;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      background: #1e293b;
+    }
+
+    .section h2 {
+      margin-top: 0;
+      color: #93c5fd;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+
+    input, button, select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background: #0f172a;
+      color: white;
+    }
+
+    button {
+      background: #2563eb;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .danger {
+      background: #dc2626;
+    }
+
+    .danger:hover {
+      background: #b91c1c;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .canvas-container {
+      position: relative;
+      overflow: auto;
+      background: #020617;
+    }
+
+    #mapCanvas {
+      display: block;
+      background: #0b1220;
+      cursor: crosshair;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .toolbar button {
+      width: auto;
+      padding: 8px 12px;
+    }
+
+    .ap-list {
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .ap-item {
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 8px;
+      background: #0f172a;
+    }
+
+    .status {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 8px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .gradient {
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      background: linear-gradient(
+        to right,
+        #ff0000,
+        #ff6600,
+        #ffee00,
+        #00ff99,
+        #00b7ff,
+        #0040ff
+      );
+    }
+
+    .legend {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="sidebar">
+
+    <div class="section">
+      <h2>Cargar mapa</h2>
+
+      <input type="file" id="mapInput" accept="image/*">
+
+      <div class="status" id="mapStatus">
+        Sin mapa cargado
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Escalar plano</h2>
+
+      <button id="scaleModeBtn">
+        Activar modo escala
+      </button>
+
+      <label>Distancia real (metros)</label>
+
+      <input
+        type="number"
+        id="realDistance"
+        value="10"
+        step="0.1"
+      >
+
+      <div class="status" id="scaleStatus">
+        Escala no definida
+      </div>
+    </div>
+
+    <div class="section">
+
+      <h2>Access Point</h2>
+
+      <div class="status" id="selectedApStatus">
+        Ningún AP seleccionado
+      </div>
+
+      <label>Nombre</label>
+      <input id="apName">
+
+      <div class="grid-2">
+
+        <div>
+          <label>IP</label>
+          <input id="apIp">
+        </div>
+
+        <div>
+          <label>MAC</label>
+          <input id="apMac">
+        </div>
+
+      </div>
+
+      <div class="grid-2">
+
+        <div>
+          <label>Modelo</label>
+          <input id="apModel">
+        </div>
+
+        <div>
+          <label>Área</label>
+          <input id="apArea">
+        </div>
+
+      </div>
+
+      <button id="placeApBtn">
+        Seleccionar posición en mapa
+      </button>
+
+      <h3>2.4 GHz</h3>
+
+      <div class="grid-4">
+
+        <input id="g24_up_5" placeholder="↑ 5m" type="number">
+        <input id="g24_down_5" placeholder="↓ 5m" type="number">
+        <input id="g24_left_5" placeholder="← 5m" type="number">
+        <input id="g24_right_5" placeholder="→ 5m" type="number">
+
+        <input id="g24_up_10" placeholder="↑ 10m" type="number">
+        <input id="g24_down_10" placeholder="↓ 10m" type="number">
+        <input id="g24_left_10" placeholder="← 10m" type="number">
+        <input id="g24_right_10" placeholder="→ 10m" type="number">
+
+      </div>
+
+      <h3>5 GHz</h3>
+
+      <div class="grid-4">
+
+        <input id="g5_up_5" placeholder="↑ 5m" type="number">
+        <input id="g5_down_5" placeholder="↓ 5m" type="number">
+        <input id="g5_left_5" placeholder="← 5m" type="number">
+        <input id="g5_right_5" placeholder="→ 5m" type="number">
+
+        <input id="g5_up_10" placeholder="↑ 10m" type="number">
+        <input id="g5_down_10" placeholder="↓ 10m" type="number">
+        <input id="g5_left_10" placeholder="← 10m" type="number">
+        <input id="g5_right_10" placeholder="→ 10m" type="number">
+
+      </div>
+
+      <button id="saveApBtn">
+        Guardar / Actualizar AP
+      </button>
+
+    </div>
+
+    <div class="section">
+
+      <h2>Access Points</h2>
+
+      <div class="ap-list" id="apList"></div>
+
+      <button class="danger" id="clearBtn">
+        Eliminar todo
+      </button>
+
+    </div>
+
+    <div class="section">
+
+      <h2>Exportar / Importar</h2>
+
+      <button id="exportBtn">
+        Exportar proyecto JSON
+      </button>
+
+      <input
+        type="file"
+        id="importInput"
+        accept="application/json"
+      >
+
+    </div>
+
+    <div class="section">
+
+      <h2>Leyenda dBm</h2>
+
+      <div class="gradient"></div>
+
+      <div class="legend">
+        <span>-100</span>
+        <span>-30</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="canvas-container">
+
+    <div class="toolbar">
+
+      <button id="render24">
+        Ver 2.4 GHz
+      </button>
+
+      <button id="render5">
+        Ver 5 GHz
+      </button>
+
+    </div>
+
+    <canvas id="mapCanvas"></canvas>
+
+  </div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+
+let mapImage = null;
+let aps = [];
+let currentBand = '2.4';
+
+let placingAp = false;
+let scalingMode = false;
+
+let scalePoints = [];
+let pixelsPerMeter = null;
+
+let selectedApId = null;
+
+function resizeCanvasToImage(img) {
+  canvas.width = img.width;
+  canvas.height = img.height;
+  draw();
+}
+
+function draw() {
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (mapImage) {
+    ctx.drawImage(mapImage, 0, 0);
+  }
+
+  renderHeatmap();
+  drawAPs();
+  drawScalePoints();
+}
+
+function drawScalePoints() {
+
+  if (scalePoints.length === 0) return;
+
+  ctx.save();
+
+  ctx.fillStyle = '#00ffff';
+  ctx.strokeStyle = '#00ffff';
+
+  scalePoints.forEach(p => {
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+
+  });
+
+  if (scalePoints.length === 2) {
+
+    ctx.beginPath();
+
+    ctx.moveTo(scalePoints[0].x, scalePoints[0].y);
+    ctx.lineTo(scalePoints[1].x, scalePoints[1].y);
+
+    ctx.stroke();
+  }
+
+  ctx.restore();
+}
+
+function dbToColor(db) {
+
+  const normalized =
+    Math.max(0, Math.min(1, (db + 100) / 70));
+
+  const hue = normalized * 240;
+
+  return `hsla(${hue},100%,50%,0.35)`;
+}
+
+function interpolate(center, edge, ratio) {
+  return center + (edge - center) * ratio;
+}
+
+function getSignalAtDistance(ap, dx, dy, band) {
+
+  const data = ap.signals[band];
+
+  const dist = Math.sqrt(dx*dx + dy*dy);
+
+  if (dist === 0) return -30;
+
+  const angle = Math.atan2(dy, dx);
+  const deg = angle * 180 / Math.PI;
+
+  let dir5, dir10;
+
+  if (deg >= -45 && deg < 45) {
+
+    dir5 = data.right5;
+    dir10 = data.right10;
+
+  } else if (deg >= 45 && deg < 135) {
+
+    dir5 = data.down5;
+    dir10 = data.down10;
+
+  } else if (deg >= -135 && deg < -45) {
+
+    dir5 = data.up5;
+    dir10 = data.up10;
+
+  } else {
+
+    dir5 = data.left5;
+    dir10 = data.left10;
+  }
+
+  const meters =
+    pixelsPerMeter
+      ? dist / pixelsPerMeter
+      : dist / 50;
+
+  if (meters <= 5) {
+    return interpolate(-30, dir5, meters / 5);
+  }
+
+  if (meters <= 10) {
+    return interpolate(dir5, dir10, (meters - 5) / 5);
+  }
+
+  return dir10 - ((meters - 10) * 2);
+}
+
+function renderHeatmap() {
+
+  if (!mapImage) return;
+
+  const step = 12;
+
+  for (let y = 0; y < canvas.height; y += step) {
+
+    for (let x = 0; x < canvas.width; x += step) {
+
+      let strongest = -120;
+
+      aps.forEach(ap => {
+
+        const signal =
+          getSignalAtDistance(
+            ap,
+            x - ap.x,
+            y - ap.y,
+            currentBand
+          );
+
+        if (signal > strongest) {
+          strongest = signal;
+        }
+
+      });
+
+      if (strongest > -100) {
+
+        ctx.fillStyle = dbToColor(strongest);
+        ctx.fillRect(x, y, step, step);
+
+      }
+    }
+  }
+}
+
+function drawAPs() {
+
+  aps.forEach(ap => {
+
+    ctx.beginPath();
+
+    ctx.arc(ap.x, ap.y, 8, 0, Math.PI * 2);
+
+    ctx.fillStyle =
+      ap.id === selectedApId
+        ? '#00ffff'
+        : '#ffffff';
+
+    ctx.fill();
+
+    ctx.strokeStyle = '#000';
+    ctx.stroke();
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '12px Arial';
+
+    ctx.fillText(
+      ap.name,
+      ap.x + 12,
+      ap.y - 12
+    );
+
+  });
+}
+
+function findAPAtPosition(x, y) {
+
+  return aps.find(ap => {
+
+    const dx = x - ap.x;
+    const dy = y - ap.y;
+
+    return Math.sqrt(dx*dx + dy*dy) <= 12;
+
+  });
+}
+
+function renderAPList() {
+
+  const container =
+    document.getElementById('apList');
+
+  container.innerHTML = '';
+
+  aps.forEach(ap => {
+
+    const div = document.createElement('div');
+
+    div.className = 'ap-item';
+
+    div.innerHTML = `
+      <strong>${ap.name}</strong><br>
+      Área: ${ap.area || '-'}<br>
+      IP: ${ap.ip || '-'}<br>
+      MAC: ${ap.mac || '-'}<br>
+      Modelo: ${ap.model || '-'}<br>
+      Posición: (${Math.round(ap.x)}, ${Math.round(ap.y)})
+
+      <br><br>
+
+      <button onclick="editAP('${ap.id}')">
+        Editar
+      </button>
+
+      <button onclick="deleteAP('${ap.id}')">
+        Eliminar
+      </button>
+    `;
+
+    container.appendChild(div);
+
+  });
+}
+
+function editAP(id) {
+
+  const ap = aps.find(a => a.id === id);
+
+  if (!ap) return;
+
+  selectedApId = id;
+
+  document.getElementById('selectedApStatus').innerText =
+    `Editando AP: ${ap.name}`;
+
+  document.getElementById('apName').value = ap.name || '';
+  document.getElementById('apIp').value = ap.ip || '';
+  document.getElementById('apMac').value = ap.mac || '';
+  document.getElementById('apModel').value = ap.model || '';
+  document.getElementById('apArea').value = ap.area || '';
+
+  const s24 = ap.signals['2.4'];
+  const s5 = ap.signals['5'];
+
+  document.getElementById('g24_up_5').value = s24.up5;
+  document.getElementById('g24_down_5').value = s24.down5;
+  document.getElementById('g24_left_5').value = s24.left5;
+  document.getElementById('g24_right_5').value = s24.right5;
+
+  document.getElementById('g24_up_10').value = s24.up10;
+  document.getElementById('g24_down_10').value = s24.down10;
+  document.getElementById('g24_left_10').value = s24.left10;
+  document.getElementById('g24_right_10').value = s24.right10;
+
+  document.getElementById('g5_up_5').value = s5.up5;
+  document.getElementById('g5_down_5').value = s5.down5;
+  document.getElementById('g5_left_5').value = s5.left5;
+  document.getElementById('g5_right_5').value = s5.right5;
+
+  document.getElementById('g5_up_10').value = s5.up10;
+  document.getElementById('g5_down_10').value = s5.down10;
+  document.getElementById('g5_left_10').value = s5.left10;
+  document.getElementById('g5_right_10').value = s5.right10;
+
+  draw();
+}
+
+function clearForm() {
+
+  selectedApId = null;
+
+  document.getElementById('selectedApStatus').innerText =
+    'Ningún AP seleccionado';
+
+  [
+    'apName','apIp','apMac',
+    'apModel','apArea',
+    'g24_up_5','g24_down_5',
+    'g24_left_5','g24_right_5',
+    'g24_up_10','g24_down_10',
+    'g24_left_10','g24_right_10',
+    'g5_up_5','g5_down_5',
+    'g5_left_5','g5_right_5',
+    'g5_up_10','g5_down_10',
+    'g5_left_10','g5_right_10'
+  ].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+
+  draw();
+}
+
+function deleteAP(id) {
+
+  aps = aps.filter(a => a.id !== id);
+
+  if (selectedApId === id) {
+    clearForm();
+  }
+
+  renderAPList();
+  draw();
+}
+
+window.editAP = editAP;
+window.deleteAP = deleteAP;
+
+document.getElementById('mapInput')
+.addEventListener('change', e => {
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = evt => {
+
+    mapImage = new Image();
+
+    mapImage.onload = () => {
+
+      resizeCanvasToImage(mapImage);
+
+      document.getElementById('mapStatus').innerText =
+        `Mapa cargado: ${file.name}`;
+
+    };
+
+    mapImage.src = evt.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('scaleModeBtn')
+.addEventListener('click', () => {
+
+  scalingMode = true;
+  placingAp = false;
+
+  scalePoints = [];
+
+  alert('Selecciona dos puntos');
+
+});
+
+document.getElementById('placeApBtn')
+.addEventListener('click', () => {
+
+  placingAp = true;
+  scalingMode = false;
+
+  alert('Haz click en el mapa');
+
+});
+
+canvas.addEventListener('click', e => {
+
+  const rect = canvas.getBoundingClientRect();
+
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (scalingMode) {
+
+    scalePoints.push({x, y});
+
+    if (scalePoints.length === 2) {
+
+      const dx =
+        scalePoints[1].x - scalePoints[0].x;
+
+      const dy =
+        scalePoints[1].y - scalePoints[0].y;
+
+      const pixelDistance =
+        Math.sqrt(dx*dx + dy*dy);
+
+      const realDistance =
+        parseFloat(
+          document.getElementById('realDistance').value
+        );
+
+      pixelsPerMeter =
+        pixelDistance / realDistance;
+
+      document.getElementById('scaleStatus').innerText =
+        `${pixelsPerMeter.toFixed(2)} px/m`;
+
+      scalingMode = false;
+    }
+
+    draw();
+    return;
+  }
+
+  if (!placingAp) {
+
+    const clickedAp =
+      findAPAtPosition(x, y);
+
+    if (clickedAp) {
+      editAP(clickedAp.id);
+    }
+
+    return;
+  }
+
+  const apData = {
+
+    name:
+      document.getElementById('apName').value || 'AP',
+
+    ip:
+      document.getElementById('apIp').value,
+
+    mac:
+      document.getElementById('apMac').value,
+
+    model:
+      document.getElementById('apModel').value,
+
+    area:
+      document.getElementById('apArea').value,
+
+    signals: {
+
+      '2.4': {
+
+        up5: parseFloat(document.getElementById('g24_up_5').value || -60),
+        down5: parseFloat(document.getElementById('g24_down_5').value || -60),
+        left5: parseFloat(document.getElementById('g24_left_5').value || -60),
+        right5: parseFloat(document.getElementById('g24_right_5').value || -60),
+
+        up10: parseFloat(document.getElementById('g24_up_10').value || -75),
+        down10: parseFloat(document.getElementById('g24_down_10').value || -75),
+        left10: parseFloat(document.getElementById('g24_left_10').value || -75),
+        right10: parseFloat(document.getElementById('g24_right_10').value || -75)
+
+      },
+
+      '5': {
+
+        up5: parseFloat(document.getElementById('g5_up_5').value || -65),
+        down5: parseFloat(document.getElementById('g5_down_5').value || -65),
+        left5: parseFloat(document.getElementById('g5_left_5').value || -65),
+        right5: parseFloat(document.getElementById('g5_right_5').value || -65),
+
+        up10: parseFloat(document.getElementById('g5_up_10').value || -80),
+        down10: parseFloat(document.getElementById('g5_down_10').value || -80),
+        left10: parseFloat(document.getElementById('g5_left_10').value || -80),
+        right10: parseFloat(document.getElementById('g5_right_10').value || -80)
+
+      }
+
+    }
+
+  };
+
+  aps.push({
+    id: crypto.randomUUID(),
+    x,
+    y,
+    ...apData
+  });
+
+  renderAPList();
+  draw();
+
+  placingAp = false;
+
+});
+
+document.getElementById('saveApBtn')
+.addEventListener('click', () => {
+
+  if (!selectedApId) {
+    alert('Selecciona un AP para editar');
+    return;
+  }
+
+  const ap = aps.find(a => a.id === selectedApId);
+
+  if (!ap) return;
+
+  ap.name = document.getElementById('apName').value;
+  ap.ip = document.getElementById('apIp').value;
+  ap.mac = document.getElementById('apMac').value;
+  ap.model = document.getElementById('apModel').value;
+  ap.area = document.getElementById('apArea').value;
+
+  ap.signals['2.4'] = {
+
+    up5: parseFloat(document.getElementById('g24_up_5').value || -60),
+    down5: parseFloat(document.getElementById('g24_down_5').value || -60),
+    left5: parseFloat(document.getElementById('g24_left_5').value || -60),
+    right5: parseFloat(document.getElementById('g24_right_5').value || -60),
+
+    up10: parseFloat(document.getElementById('g24_up_10').value || -75),
+    down10: parseFloat(document.getElementById('g24_down_10').value || -75),
+    left10: parseFloat(document.getElementById('g24_left_10').value || -75),
+    right10: parseFloat(document.getElementById('g24_right_10').value || -75)
+
+  };
+
+  ap.signals['5'] = {
+
+    up5: parseFloat(document.getElementById('g5_up_5').value || -65),
+    down5: parseFloat(document.getElementById('g5_down_5').value || -65),
+    left5: parseFloat(document.getElementById('g5_left_5').value || -65),
+    right5: parseFloat(document.getElementById('g5_right_5').value || -65),
+
+    up10: parseFloat(document.getElementById('g5_up_10').value || -80),
+    down10: parseFloat(document.getElementById('g5_down_10').value || -80),
+    left10: parseFloat(document.getElementById('g5_left_10').value || -80),
+    right10: parseFloat(document.getElementById('g5_right_10').value || -80)
+
+  };
+
+  renderAPList();
+  draw();
+
+  alert('AP actualizado');
+
+});
+
+document.getElementById('render24')
+.addEventListener('click', () => {
+
+  currentBand = '2.4';
+  draw();
+
+});
+
+document.getElementById('render5')
+.addEventListener('click', () => {
+
+  currentBand = '5';
+  draw();
+
+});
+
+document.getElementById('clearBtn')
+.addEventListener('click', () => {
+
+  if (!confirm('¿Eliminar todos?')) return;
+
+  aps = [];
+
+  clearForm();
+  renderAPList();
+  draw();
+
+});
+
+document.getElementById('exportBtn')
+.addEventListener('click', () => {
+
+  const data = {
+    aps,
+    pixelsPerMeter
+  };
+
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    {type: 'application/json'}
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+
+  a.href = url;
+  a.download = 'wifi_heatmap_project.json';
+
+  a.click();
+
+  URL.revokeObjectURL(url);
+
+});
+
+document.getElementById('importInput')
+.addEventListener('change', e => {
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = evt => {
+
+    const data =
+      JSON.parse(evt.target.result);
+
+    aps = data.aps || [];
+    pixelsPerMeter = data.pixelsPerMeter || null;
+
+    renderAPList();
+    draw();
+
+  };
+
+  reader.readAsText(file);
+
+});
+
+</script>
+
+</body>
+</html>
