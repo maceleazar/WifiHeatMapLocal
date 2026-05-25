@@ -423,16 +423,16 @@ Puede modificarse libremente según las necesidades de la empresa.
 Se ha añadido un nuevo sistema avanzado de gestión de APs que permite editar y simular configuraciones de red de forma mucho más flexible.
 
 Cambios añadidos:
-✏️Edición completa de APs ya colocados
-✏️Selección de APs directamente desde el mapa
-✏️Visualización y modificación de todas las señales registradas
-✏️Compatibilidad con proyectos importados
-✏️Posibilidad de colocar múltiples APs en la misma posición
-✏️Activación y desactivación individual de APs
-✏️Resaltado visual de APs activos, desactivados y seleccionados
-✏️Nueva interfaz de gestión con botones de editar, activar/desactivar y eliminar
-✏️Compatibilidad con proyectos antiguos
-✏️Recalculo automático del mapa de calor en tiempo real
+* Edición completa de APs ya colocados
+* Selección de APs directamente desde el mapa
+* Visualización y modificación de todas las señales registradas
+* Compatibilidad con proyectos importados
+* Posibilidad de colocar múltiples APs en la misma posición
+* Activación y desactivación individual de APs
+* Resaltado visual de APs activos, desactivados y seleccionados
+* Nueva interfaz de gestión con botones de editar, activar/desactivar y eliminar
+* Compatibilidad con proyectos antiguos
+* Recalculo automático del mapa de calor en tiempo real
 
 Resultado:
 
