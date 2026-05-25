@@ -1,347 +1,368 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mapa de Calor WiFi Local</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<title>Mapa de Calor WiFi</title>
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      overflow: hidden;
-    }
+<style>
 
-    .app {
-      display: grid;
-      grid-template-columns: 420px 1fr;
-      height: 100vh;
-    }
+*{
+  box-sizing:border-box;
+}
 
-    .sidebar {
-      background: #111827;
-      border-right: 1px solid #334155;
-      padding: 16px;
-      overflow-y: auto;
-    }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  overflow:hidden;
+}
 
-    .section {
-      margin-bottom: 18px;
-      padding: 14px;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      background: #1e293b;
-    }
+.app{
+  display:grid;
+  grid-template-columns:430px 1fr;
+  height:100vh;
+}
 
-    .section h2 {
-      margin-top: 0;
-      color: #93c5fd;
-    }
+.sidebar{
+  background:#111827;
+  border-right:1px solid #334155;
+  padding:16px;
+  overflow-y:auto;
+}
 
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 12px;
-    }
+.section{
+  margin-bottom:18px;
+  padding:14px;
+  border:1px solid #334155;
+  border-radius:12px;
+  background:#1e293b;
+}
 
-    input, button, select {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background: #0f172a;
-      color: white;
-    }
+.section h2{
+  margin-top:0;
+  color:#93c5fd;
+}
 
-    button {
-      background: #2563eb;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
+label{
+  display:block;
+  margin-bottom:6px;
+  font-size:12px;
+}
 
-    button:hover {
-      background: #1d4ed8;
-    }
+input,
+button,
+select{
+  width:100%;
+  margin-bottom:10px;
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #475569;
+  background:#0f172a;
+  color:white;
+}
 
-    .danger {
-      background: #dc2626;
-    }
+button{
+  border:none;
+  cursor:pointer;
+  background:#2563eb;
+  font-weight:bold;
+}
 
-    .danger:hover {
-      background: #b91c1c;
-    }
+button:hover{
+  background:#1d4ed8;
+}
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
 
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
+.grid-4{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
 
-    .canvas-container {
-      position: relative;
-      overflow: auto;
-      background: #020617;
-    }
+.canvas-container{
+  position:relative;
+  overflow:auto;
+  background:#020617;
+}
 
-    #mapCanvas {
-      display: block;
-      background: #0b1220;
-      cursor: crosshair;
-    }
+#mapCanvas{
+  display:block;
+  background:#0b1220;
+  cursor:crosshair;
+}
 
-    .toolbar {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
+.toolbar{
+  position:absolute;
+  top:12px;
+  right:12px;
+  display:flex;
+  gap:8px;
+  z-index:10;
+}
 
-    .toolbar button {
-      width: auto;
-      padding: 8px 12px;
-    }
+.toolbar button{
+  width:auto;
+}
 
-    .ap-list {
-      max-height: 260px;
-      overflow-y: auto;
-    }
+.status{
+  background:#0f172a;
+  border:1px solid #334155;
+  padding:8px;
+  border-radius:8px;
+  margin-bottom:10px;
+  font-size:12px;
+}
 
-    .ap-item {
-      border: 1px solid #334155;
-      border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 8px;
-      background: #0f172a;
-    }
+.ap-list{
+  max-height:350px;
+  overflow-y:auto;
+}
 
-    .status {
-      background: #0f172a;
-      border: 1px solid #334155;
-      padding: 8px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      font-size: 12px;
-    }
+.ap-item{
+  border:1px solid #334155;
+  background:#0f172a;
+  border-radius:8px;
+  padding:8px;
+  margin-bottom:10px;
+}
 
-    .gradient {
-      width: 100%;
-      height: 16px;
-      border-radius: 999px;
-      background: linear-gradient(
-        to right,
-        #ff0000,
-        #ff6600,
-        #ffee00,
-        #00ff99,
-        #00b7ff,
-        #0040ff
-      );
-    }
+.ap-disabled{
+  opacity:0.45;
+}
 
-    .legend {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
-      font-size: 12px;
-    }
+.small-btn{
+  padding:6px;
+  font-size:11px;
+  margin-top:6px;
+}
 
-  </style>
+.toggle-on{
+  background:#059669;
+}
+
+.toggle-off{
+  background:#dc2626;
+}
+
+.legend{
+  display:flex;
+  justify-content:space-between;
+  margin-top:6px;
+}
+
+.gradient{
+  width:100%;
+  height:16px;
+  border-radius:999px;
+  background:linear-gradient(
+    to right,
+    #ff0000,
+    #ff6600,
+    #ffee00,
+    #00ff99,
+    #00b7ff,
+    #0040ff
+  );
+}
+
+.selected-marker{
+  color:#00ffff;
+  font-weight:bold;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <div class="sidebar">
+<div class="sidebar">
 
-    <div class="section">
-      <h2>Cargar mapa</h2>
+<div class="section">
 
-      <input type="file" id="mapInput" accept="image/*">
+<h2>Cargar mapa</h2>
 
-      <div class="status" id="mapStatus">
-        Sin mapa cargado
-      </div>
-    </div>
+<input type="file" id="mapInput" accept="image/*">
 
-    <div class="section">
-      <h2>Escalar plano</h2>
+<div class="status" id="mapStatus">
+Sin mapa cargado
+</div>
 
-      <button id="scaleModeBtn">
-        Activar modo escala
-      </button>
+</div>
 
-      <label>Distancia real (metros)</label>
+<div class="section">
 
-      <input
-        type="number"
-        id="realDistance"
-        value="10"
-        step="0.1"
-      >
+<h2>Escalar plano</h2>
 
-      <div class="status" id="scaleStatus">
-        Escala no definida
-      </div>
-    </div>
+<button id="scaleModeBtn">
+Activar modo escala
+</button>
 
-    <div class="section">
+<label>Distancia real (metros)</label>
 
-      <h2>Access Point</h2>
+<input
+type="number"
+id="realDistance"
+value="10"
+step="0.1"
+/>
 
-      <div class="status" id="selectedApStatus">
-        Ningún AP seleccionado
-      </div>
+<div class="status" id="scaleStatus">
+Escala no definida
+</div>
 
-      <label>Nombre</label>
-      <input id="apName">
+</div>
 
-      <div class="grid-2">
+<div class="section">
 
-        <div>
-          <label>IP</label>
-          <input id="apIp">
-        </div>
+<h2>Access Point</h2>
 
-        <div>
-          <label>MAC</label>
-          <input id="apMac">
-        </div>
+<div class="status" id="selectedApStatus">
+Ningún AP seleccionado
+</div>
 
-      </div>
+<label>Nombre</label>
+<input id="apName">
 
-      <div class="grid-2">
+<div class="grid-2">
 
-        <div>
-          <label>Modelo</label>
-          <input id="apModel">
-        </div>
+<div>
+<label>IP</label>
+<input id="apIp">
+</div>
 
-        <div>
-          <label>Área</label>
-          <input id="apArea">
-        </div>
+<div>
+<label>MAC</label>
+<input id="apMac">
+</div>
 
-      </div>
+</div>
 
-      <button id="placeApBtn">
-        Seleccionar posición en mapa
-      </button>
+<div class="grid-2">
 
-      <h3>2.4 GHz</h3>
+<div>
+<label>Modelo</label>
+<input id="apModel">
+</div>
 
-      <div class="grid-4">
+<div>
+<label>Área</label>
+<input id="apArea">
+</div>
 
-        <input id="g24_up_5" placeholder="↑ 5m" type="number">
-        <input id="g24_down_5" placeholder="↓ 5m" type="number">
-        <input id="g24_left_5" placeholder="← 5m" type="number">
-        <input id="g24_right_5" placeholder="→ 5m" type="number">
+</div>
 
-        <input id="g24_up_10" placeholder="↑ 10m" type="number">
-        <input id="g24_down_10" placeholder="↓ 10m" type="number">
-        <input id="g24_left_10" placeholder="← 10m" type="number">
-        <input id="g24_right_10" placeholder="→ 10m" type="number">
+<button id="placeApBtn">
+Colocar nuevo AP
+</button>
 
-      </div>
+<h3>2.4 GHz</h3>
 
-      <h3>5 GHz</h3>
+<div class="grid-4">
 
-      <div class="grid-4">
+<input id="g24_up_5" placeholder="↑5m" type="number">
+<input id="g24_down_5" placeholder="↓5m" type="number">
+<input id="g24_left_5" placeholder="←5m" type="number">
+<input id="g24_right_5" placeholder="→5m" type="number">
 
-        <input id="g5_up_5" placeholder="↑ 5m" type="number">
-        <input id="g5_down_5" placeholder="↓ 5m" type="number">
-        <input id="g5_left_5" placeholder="← 5m" type="number">
-        <input id="g5_right_5" placeholder="→ 5m" type="number">
+<input id="g24_up_10" placeholder="↑10m" type="number">
+<input id="g24_down_10" placeholder="↓10m" type="number">
+<input id="g24_left_10" placeholder="←10m" type="number">
+<input id="g24_right_10" placeholder="→10m" type="number">
 
-        <input id="g5_up_10" placeholder="↑ 10m" type="number">
-        <input id="g5_down_10" placeholder="↓ 10m" type="number">
-        <input id="g5_left_10" placeholder="← 10m" type="number">
-        <input id="g5_right_10" placeholder="→ 10m" type="number">
+</div>
 
-      </div>
+<h3>5 GHz</h3>
 
-      <button id="saveApBtn">
-        Guardar / Actualizar AP
-      </button>
+<div class="grid-4">
 
-    </div>
+<input id="g5_up_5" placeholder="↑5m" type="number">
+<input id="g5_down_5" placeholder="↓5m" type="number">
+<input id="g5_left_5" placeholder="←5m" type="number">
+<input id="g5_right_5" placeholder="→5m" type="number">
 
-    <div class="section">
+<input id="g5_up_10" placeholder="↑10m" type="number">
+<input id="g5_down_10" placeholder="↓10m" type="number">
+<input id="g5_left_10" placeholder="←10m" type="number">
+<input id="g5_right_10" placeholder="→10m" type="number">
 
-      <h2>Access Points</h2>
+</div>
 
-      <div class="ap-list" id="apList"></div>
+<button id="saveApBtn">
+Guardar cambios
+</button>
 
-      <button class="danger" id="clearBtn">
-        Eliminar todo
-      </button>
+</div>
 
-    </div>
+<div class="section">
 
-    <div class="section">
+<h2>Access Points</h2>
 
-      <h2>Exportar / Importar</h2>
+<div class="ap-list" id="apList"></div>
 
-      <button id="exportBtn">
-        Exportar proyecto JSON
-      </button>
+<button id="clearBtn" style="background:#dc2626">
+Eliminar todos
+</button>
 
-      <input
-        type="file"
-        id="importInput"
-        accept="application/json"
-      >
+</div>
 
-    </div>
+<div class="section">
 
-    <div class="section">
+<h2>Exportar / Importar</h2>
 
-      <h2>Leyenda dBm</h2>
+<button id="exportBtn">
+Exportar JSON
+</button>
 
-      <div class="gradient"></div>
+<input
+type="file"
+id="importInput"
+accept="application/json"
+/>
 
-      <div class="legend">
-        <span>-100</span>
-        <span>-30</span>
-      </div>
+</div>
 
-    </div>
+<div class="section">
 
-  </div>
+<h2>Leyenda</h2>
 
-  <div class="canvas-container">
+<div class="gradient"></div>
 
-    <div class="toolbar">
+<div class="legend">
+<span>-100</span>
+<span>-30</span>
+</div>
 
-      <button id="render24">
-        Ver 2.4 GHz
-      </button>
+</div>
 
-      <button id="render5">
-        Ver 5 GHz
-      </button>
+</div>
 
-    </div>
+<div class="canvas-container">
 
-    <canvas id="mapCanvas"></canvas>
+<div class="toolbar">
 
-  </div>
+<button id="render24">
+Ver 2.4 GHz
+</button>
+
+<button id="render5">
+Ver 5 GHz
+</button>
+
+</div>
+
+<canvas id="mapCanvas"></canvas>
+
+</div>
 
 </div>
 
@@ -351,7 +372,9 @@ const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
 
 let mapImage = null;
+
 let aps = [];
+
 let currentBand = '2.4';
 
 let placingAp = false;
@@ -362,18 +385,20 @@ let pixelsPerMeter = null;
 
 let selectedApId = null;
 
-function resizeCanvasToImage(img) {
+function resizeCanvasToImage(img){
+
   canvas.width = img.width;
   canvas.height = img.height;
+
   draw();
 }
 
-function draw() {
+function draw(){
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  if (mapImage) {
-    ctx.drawImage(mapImage, 0, 0);
+  if(mapImage){
+    ctx.drawImage(mapImage,0,0);
   }
 
   renderHeatmap();
@@ -381,29 +406,29 @@ function draw() {
   drawScalePoints();
 }
 
-function drawScalePoints() {
+function drawScalePoints(){
 
-  if (scalePoints.length === 0) return;
+  if(scalePoints.length===0) return;
 
   ctx.save();
 
-  ctx.fillStyle = '#00ffff';
-  ctx.strokeStyle = '#00ffff';
+  ctx.fillStyle='#00ffff';
+  ctx.strokeStyle='#00ffff';
 
-  scalePoints.forEach(p => {
+  scalePoints.forEach(p=>{
 
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+    ctx.arc(p.x,p.y,8,0,Math.PI*2);
     ctx.fill();
 
   });
 
-  if (scalePoints.length === 2) {
+  if(scalePoints.length===2){
 
     ctx.beginPath();
 
-    ctx.moveTo(scalePoints[0].x, scalePoints[0].y);
-    ctx.lineTo(scalePoints[1].x, scalePoints[1].y);
+    ctx.moveTo(scalePoints[0].x,scalePoints[0].y);
+    ctx.lineTo(scalePoints[1].x,scalePoints[1].y);
 
     ctx.stroke();
   }
@@ -411,52 +436,53 @@ function drawScalePoints() {
   ctx.restore();
 }
 
-function dbToColor(db) {
+function dbToColor(db){
 
   const normalized =
-    Math.max(0, Math.min(1, (db + 100) / 70));
+    Math.max(0,Math.min(1,(db+100)/70));
 
   const hue = normalized * 240;
 
   return `hsla(${hue},100%,50%,0.35)`;
 }
 
-function interpolate(center, edge, ratio) {
-  return center + (edge - center) * ratio;
+function interpolate(a,b,t){
+  return a + (b-a)*t;
 }
 
-function getSignalAtDistance(ap, dx, dy, band) {
+function getSignalAtDistance(ap,dx,dy,band){
 
   const data = ap.signals[band];
 
   const dist = Math.sqrt(dx*dx + dy*dy);
 
-  if (dist === 0) return -30;
+  if(dist===0) return -30;
 
-  const angle = Math.atan2(dy, dx);
+  const angle = Math.atan2(dy,dx);
   const deg = angle * 180 / Math.PI;
 
-  let dir5, dir10;
+  let dir5;
+  let dir10;
 
-  if (deg >= -45 && deg < 45) {
+  if(deg>=-45 && deg<45){
 
-    dir5 = data.right5;
-    dir10 = data.right10;
+    dir5=data.right5;
+    dir10=data.right10;
 
-  } else if (deg >= 45 && deg < 135) {
+  }else if(deg>=45 && deg<135){
 
-    dir5 = data.down5;
-    dir10 = data.down10;
+    dir5=data.down5;
+    dir10=data.down10;
 
-  } else if (deg >= -135 && deg < -45) {
+  }else if(deg>=-135 && deg<-45){
 
-    dir5 = data.up5;
-    dir10 = data.up10;
+    dir5=data.up5;
+    dir10=data.up10;
 
-  } else {
+  }else{
 
-    dir5 = data.left5;
-    dir10 = data.left10;
+    dir5=data.left5;
+    dir10=data.left10;
   }
 
   const meters =
@@ -464,144 +490,194 @@ function getSignalAtDistance(ap, dx, dy, band) {
       ? dist / pixelsPerMeter
       : dist / 50;
 
-  if (meters <= 5) {
-    return interpolate(-30, dir5, meters / 5);
+  if(meters<=5){
+    return interpolate(-30,dir5,meters/5);
   }
 
-  if (meters <= 10) {
-    return interpolate(dir5, dir10, (meters - 5) / 5);
+  if(meters<=10){
+    return interpolate(dir5,dir10,(meters-5)/5);
   }
 
-  return dir10 - ((meters - 10) * 2);
+  return dir10 - ((meters-10)*2);
 }
 
-function renderHeatmap() {
+function renderHeatmap(){
 
-  if (!mapImage) return;
+  if(!mapImage) return;
 
   const step = 12;
 
-  for (let y = 0; y < canvas.height; y += step) {
+  for(let y=0;y<canvas.height;y+=step){
 
-    for (let x = 0; x < canvas.width; x += step) {
+    for(let x=0;x<canvas.width;x+=step){
 
       let strongest = -120;
 
-      aps.forEach(ap => {
+      aps.forEach(ap=>{
+
+        if(!ap.enabled) return;
 
         const signal =
           getSignalAtDistance(
             ap,
-            x - ap.x,
-            y - ap.y,
+            x-ap.x,
+            y-ap.y,
             currentBand
           );
 
-        if (signal > strongest) {
+        if(signal > strongest){
           strongest = signal;
         }
 
       });
 
-      if (strongest > -100) {
+      if(strongest > -100){
 
         ctx.fillStyle = dbToColor(strongest);
-        ctx.fillRect(x, y, step, step);
+        ctx.fillRect(x,y,step,step);
 
       }
+
     }
+
   }
+
 }
 
-function drawAPs() {
+function drawAPs(){
 
-  aps.forEach(ap => {
+  aps.forEach(ap=>{
 
     ctx.beginPath();
 
-    ctx.arc(ap.x, ap.y, 8, 0, Math.PI * 2);
+    ctx.arc(ap.x,ap.y,8,0,Math.PI*2);
 
-    ctx.fillStyle =
-      ap.id === selectedApId
-        ? '#00ffff'
-        : '#ffffff';
+    if(ap.id === selectedApId){
+      ctx.fillStyle = '#00ffff';
+    }else if(ap.enabled){
+      ctx.fillStyle = '#ffffff';
+    }else{
+      ctx.fillStyle = '#555';
+    }
 
     ctx.fill();
 
-    ctx.strokeStyle = '#000';
+    ctx.strokeStyle='#000';
     ctx.stroke();
 
-    ctx.fillStyle = '#fff';
-    ctx.font = '12px Arial';
+    ctx.fillStyle='#fff';
+    ctx.font='12px Arial';
 
-    ctx.fillText(
-      ap.name,
-      ap.x + 12,
-      ap.y - 12
-    );
+    const text =
+      ap.enabled
+        ? ap.name
+        : `[OFF] ${ap.name}`;
+
+    ctx.fillText(text,ap.x+12,ap.y-12);
 
   });
+
 }
 
-function findAPAtPosition(x, y) {
+function findAPAtPosition(x,y){
 
-  return aps.find(ap => {
+  return aps.find(ap=>{
 
-    const dx = x - ap.x;
-    const dy = y - ap.y;
+    const dx = x-ap.x;
+    const dy = y-ap.y;
 
     return Math.sqrt(dx*dx + dy*dy) <= 12;
 
   });
+
 }
 
-function renderAPList() {
+function renderAPList(){
 
   const container =
     document.getElementById('apList');
 
-  container.innerHTML = '';
+  container.innerHTML='';
 
-  aps.forEach(ap => {
+  aps.forEach(ap=>{
 
     const div = document.createElement('div');
 
-    div.className = 'ap-item';
+    div.className =
+      ap.enabled
+        ? 'ap-item'
+        : 'ap-item ap-disabled';
 
     div.innerHTML = `
-      <strong>${ap.name}</strong><br>
+
+      <div class="${
+        ap.id===selectedApId
+          ? 'selected-marker'
+          : ''
+      }">
+
+      <strong>${ap.name}</strong>
+
+      </div>
+
       Área: ${ap.area || '-'}<br>
       IP: ${ap.ip || '-'}<br>
       MAC: ${ap.mac || '-'}<br>
       Modelo: ${ap.model || '-'}<br>
-      Posición: (${Math.round(ap.x)}, ${Math.round(ap.y)})
+
+      Posición:
+      (${Math.round(ap.x)}, ${Math.round(ap.y)})
 
       <br><br>
 
-      <button onclick="editAP('${ap.id}')">
+      <button
+        class="small-btn"
+        onclick="editAP('${ap.id}')"
+      >
         Editar
       </button>
 
-      <button onclick="deleteAP('${ap.id}')">
+      <button
+        class="small-btn ${
+          ap.enabled
+            ? 'toggle-on'
+            : 'toggle-off'
+        }"
+        onclick="toggleAP('${ap.id}')"
+      >
+        ${
+          ap.enabled
+            ? 'Desactivar'
+            : 'Activar'
+        }
+      </button>
+
+      <button
+        class="small-btn"
+        style="background:#dc2626"
+        onclick="deleteAP('${ap.id}')"
+      >
         Eliminar
       </button>
+
     `;
 
     container.appendChild(div);
 
   });
+
 }
 
-function editAP(id) {
+function editAP(id){
 
-  const ap = aps.find(a => a.id === id);
+  const ap = aps.find(a=>a.id===id);
 
-  if (!ap) return;
+  if(!ap) return;
 
   selectedApId = id;
 
   document.getElementById('selectedApStatus').innerText =
-    `Editando AP: ${ap.name}`;
+    `Editando: ${ap.name}`;
 
   document.getElementById('apName').value = ap.name || '';
   document.getElementById('apIp').value = ap.ip || '';
@@ -612,82 +688,71 @@ function editAP(id) {
   const s24 = ap.signals['2.4'];
   const s5 = ap.signals['5'];
 
-  document.getElementById('g24_up_5').value = s24.up5;
-  document.getElementById('g24_down_5').value = s24.down5;
-  document.getElementById('g24_left_5').value = s24.left5;
-  document.getElementById('g24_right_5').value = s24.right5;
+  document.getElementById('g24_up_5').value=s24.up5;
+  document.getElementById('g24_down_5').value=s24.down5;
+  document.getElementById('g24_left_5').value=s24.left5;
+  document.getElementById('g24_right_5').value=s24.right5;
 
-  document.getElementById('g24_up_10').value = s24.up10;
-  document.getElementById('g24_down_10').value = s24.down10;
-  document.getElementById('g24_left_10').value = s24.left10;
-  document.getElementById('g24_right_10').value = s24.right10;
+  document.getElementById('g24_up_10').value=s24.up10;
+  document.getElementById('g24_down_10').value=s24.down10;
+  document.getElementById('g24_left_10').value=s24.left10;
+  document.getElementById('g24_right_10').value=s24.right10;
 
-  document.getElementById('g5_up_5').value = s5.up5;
-  document.getElementById('g5_down_5').value = s5.down5;
-  document.getElementById('g5_left_5').value = s5.left5;
-  document.getElementById('g5_right_5').value = s5.right5;
+  document.getElementById('g5_up_5').value=s5.up5;
+  document.getElementById('g5_down_5').value=s5.down5;
+  document.getElementById('g5_left_5').value=s5.left5;
+  document.getElementById('g5_right_5').value=s5.right5;
 
-  document.getElementById('g5_up_10').value = s5.up10;
-  document.getElementById('g5_down_10').value = s5.down10;
-  document.getElementById('g5_left_10').value = s5.left10;
-  document.getElementById('g5_right_10').value = s5.right10;
-
-  draw();
-}
-
-function clearForm() {
-
-  selectedApId = null;
-
-  document.getElementById('selectedApStatus').innerText =
-    'Ningún AP seleccionado';
-
-  [
-    'apName','apIp','apMac',
-    'apModel','apArea',
-    'g24_up_5','g24_down_5',
-    'g24_left_5','g24_right_5',
-    'g24_up_10','g24_down_10',
-    'g24_left_10','g24_right_10',
-    'g5_up_5','g5_down_5',
-    'g5_left_5','g5_right_5',
-    'g5_up_10','g5_down_10',
-    'g5_left_10','g5_right_10'
-  ].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  document.getElementById('g5_up_10').value=s5.up10;
+  document.getElementById('g5_down_10').value=s5.down10;
+  document.getElementById('g5_left_10').value=s5.left10;
+  document.getElementById('g5_right_10').value=s5.right10;
 
   draw();
+  renderAPList();
 }
 
-function deleteAP(id) {
+function toggleAP(id){
 
-  aps = aps.filter(a => a.id !== id);
+  const ap = aps.find(a=>a.id===id);
 
-  if (selectedApId === id) {
-    clearForm();
+  if(!ap) return;
+
+  ap.enabled = !ap.enabled;
+
+  draw();
+  renderAPList();
+}
+
+function deleteAP(id){
+
+  aps = aps.filter(a=>a.id!==id);
+
+  if(selectedApId===id){
+    selectedApId=null;
   }
 
-  renderAPList();
   draw();
+  renderAPList();
 }
 
 window.editAP = editAP;
+window.toggleAP = toggleAP;
 window.deleteAP = deleteAP;
 
 document.getElementById('mapInput')
-.addEventListener('change', e => {
+.addEventListener('change',e=>{
 
   const file = e.target.files[0];
-  if (!file) return;
+  if(!file) return;
 
   const reader = new FileReader();
 
-  reader.onload = evt => {
+  reader.onload = evt=>{
 
     mapImage = new Image();
 
-    mapImage.onload = () => {
+    mapImage.onload = ()=>{
 
       resizeCanvasToImage(mapImage);
 
@@ -697,45 +762,46 @@ document.getElementById('mapInput')
     };
 
     mapImage.src = evt.target.result;
+
   };
 
   reader.readAsDataURL(file);
+
 });
 
 document.getElementById('scaleModeBtn')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  scalingMode = true;
-  placingAp = false;
-
-  scalePoints = [];
+  scalingMode=true;
+  placingAp=false;
+  scalePoints=[];
 
   alert('Selecciona dos puntos');
 
 });
 
 document.getElementById('placeApBtn')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  placingAp = true;
-  scalingMode = false;
+  placingAp=true;
+  scalingMode=false;
 
   alert('Haz click en el mapa');
 
 });
 
-canvas.addEventListener('click', e => {
+canvas.addEventListener('click',e=>{
 
   const rect = canvas.getBoundingClientRect();
 
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
 
-  if (scalingMode) {
+  if(scalingMode){
 
-    scalePoints.push({x, y});
+    scalePoints.push({x,y});
 
-    if (scalePoints.length === 2) {
+    if(scalePoints.length===2){
 
       const dx =
         scalePoints[1].x - scalePoints[0].x;
@@ -757,26 +823,33 @@ canvas.addEventListener('click', e => {
       document.getElementById('scaleStatus').innerText =
         `${pixelsPerMeter.toFixed(2)} px/m`;
 
-      scalingMode = false;
+      scalingMode=false;
     }
 
     draw();
     return;
   }
 
-  if (!placingAp) {
+  if(!placingAp){
 
     const clickedAp =
-      findAPAtPosition(x, y);
+      findAPAtPosition(x,y);
 
-    if (clickedAp) {
+    if(clickedAp){
       editAP(clickedAp.id);
     }
 
     return;
   }
 
-  const apData = {
+  const ap = {
+
+    id: crypto.randomUUID(),
+
+    enabled:true,
+
+    x,
+    y,
 
     name:
       document.getElementById('apName').value || 'AP',
@@ -793,33 +866,33 @@ canvas.addEventListener('click', e => {
     area:
       document.getElementById('apArea').value,
 
-    signals: {
+    signals:{
 
-      '2.4': {
+      '2.4':{
 
-        up5: parseFloat(document.getElementById('g24_up_5').value || -60),
-        down5: parseFloat(document.getElementById('g24_down_5').value || -60),
-        left5: parseFloat(document.getElementById('g24_left_5').value || -60),
-        right5: parseFloat(document.getElementById('g24_right_5').value || -60),
+        up5:parseFloat(document.getElementById('g24_up_5').value || -60),
+        down5:parseFloat(document.getElementById('g24_down_5').value || -60),
+        left5:parseFloat(document.getElementById('g24_left_5').value || -60),
+        right5:parseFloat(document.getElementById('g24_right_5').value || -60),
 
-        up10: parseFloat(document.getElementById('g24_up_10').value || -75),
-        down10: parseFloat(document.getElementById('g24_down_10').value || -75),
-        left10: parseFloat(document.getElementById('g24_left_10').value || -75),
-        right10: parseFloat(document.getElementById('g24_right_10').value || -75)
+        up10:parseFloat(document.getElementById('g24_up_10').value || -75),
+        down10:parseFloat(document.getElementById('g24_down_10').value || -75),
+        left10:parseFloat(document.getElementById('g24_left_10').value || -75),
+        right10:parseFloat(document.getElementById('g24_right_10').value || -75)
 
       },
 
-      '5': {
+      '5':{
 
-        up5: parseFloat(document.getElementById('g5_up_5').value || -65),
-        down5: parseFloat(document.getElementById('g5_down_5').value || -65),
-        left5: parseFloat(document.getElementById('g5_left_5').value || -65),
-        right5: parseFloat(document.getElementById('g5_right_5').value || -65),
+        up5:parseFloat(document.getElementById('g5_up_5').value || -65),
+        down5:parseFloat(document.getElementById('g5_down_5').value || -65),
+        left5:parseFloat(document.getElementById('g5_left_5').value || -65),
+        right5:parseFloat(document.getElementById('g5_right_5').value || -65),
 
-        up10: parseFloat(document.getElementById('g5_up_10').value || -80),
-        down10: parseFloat(document.getElementById('g5_down_10').value || -80),
-        left10: parseFloat(document.getElementById('g5_left_10').value || -80),
-        right10: parseFloat(document.getElementById('g5_right_10').value || -80)
+        up10:parseFloat(document.getElementById('g5_up_10').value || -80),
+        down10:parseFloat(document.getElementById('g5_down_10').value || -80),
+        left10:parseFloat(document.getElementById('g5_left_10').value || -80),
+        right10:parseFloat(document.getElementById('g5_right_10').value || -80)
 
       }
 
@@ -827,104 +900,108 @@ canvas.addEventListener('click', e => {
 
   };
 
-  aps.push({
-    id: crypto.randomUUID(),
-    x,
-    y,
-    ...apData
-  });
+  aps.push(ap);
 
-  renderAPList();
+  placingAp=false;
+
   draw();
-
-  placingAp = false;
+  renderAPList();
 
 });
 
 document.getElementById('saveApBtn')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  if (!selectedApId) {
-    alert('Selecciona un AP para editar');
+  if(!selectedApId){
+    alert('Selecciona un AP');
     return;
   }
 
-  const ap = aps.find(a => a.id === selectedApId);
+  const ap =
+    aps.find(a=>a.id===selectedApId);
 
-  if (!ap) return;
+  if(!ap) return;
 
-  ap.name = document.getElementById('apName').value;
-  ap.ip = document.getElementById('apIp').value;
-  ap.mac = document.getElementById('apMac').value;
-  ap.model = document.getElementById('apModel').value;
-  ap.area = document.getElementById('apArea').value;
+  ap.name =
+    document.getElementById('apName').value;
+
+  ap.ip =
+    document.getElementById('apIp').value;
+
+  ap.mac =
+    document.getElementById('apMac').value;
+
+  ap.model =
+    document.getElementById('apModel').value;
+
+  ap.area =
+    document.getElementById('apArea').value;
 
   ap.signals['2.4'] = {
 
-    up5: parseFloat(document.getElementById('g24_up_5').value || -60),
-    down5: parseFloat(document.getElementById('g24_down_5').value || -60),
-    left5: parseFloat(document.getElementById('g24_left_5').value || -60),
-    right5: parseFloat(document.getElementById('g24_right_5').value || -60),
+    up5:parseFloat(document.getElementById('g24_up_5').value || -60),
+    down5:parseFloat(document.getElementById('g24_down_5').value || -60),
+    left5:parseFloat(document.getElementById('g24_left_5').value || -60),
+    right5:parseFloat(document.getElementById('g24_right_5').value || -60),
 
-    up10: parseFloat(document.getElementById('g24_up_10').value || -75),
-    down10: parseFloat(document.getElementById('g24_down_10').value || -75),
-    left10: parseFloat(document.getElementById('g24_left_10').value || -75),
-    right10: parseFloat(document.getElementById('g24_right_10').value || -75)
+    up10:parseFloat(document.getElementById('g24_up_10').value || -75),
+    down10:parseFloat(document.getElementById('g24_down_10').value || -75),
+    left10:parseFloat(document.getElementById('g24_left_10').value || -75),
+    right10:parseFloat(document.getElementById('g24_right_10').value || -75)
 
   };
 
   ap.signals['5'] = {
 
-    up5: parseFloat(document.getElementById('g5_up_5').value || -65),
-    down5: parseFloat(document.getElementById('g5_down_5').value || -65),
-    left5: parseFloat(document.getElementById('g5_left_5').value || -65),
-    right5: parseFloat(document.getElementById('g5_right_5').value || -65),
+    up5:parseFloat(document.getElementById('g5_up_5').value || -65),
+    down5:parseFloat(document.getElementById('g5_down_5').value || -65),
+    left5:parseFloat(document.getElementById('g5_left_5').value || -65),
+    right5:parseFloat(document.getElementById('g5_right_5').value || -65),
 
-    up10: parseFloat(document.getElementById('g5_up_10').value || -80),
-    down10: parseFloat(document.getElementById('g5_down_10').value || -80),
-    left10: parseFloat(document.getElementById('g5_left_10').value || -80),
-    right10: parseFloat(document.getElementById('g5_right_10').value || -80)
+    up10:parseFloat(document.getElementById('g5_up_10').value || -80),
+    down10:parseFloat(document.getElementById('g5_down_10').value || -80),
+    left10:parseFloat(document.getElementById('g5_left_10').value || -80),
+    right10:parseFloat(document.getElementById('g5_right_10').value || -80)
 
   };
 
-  renderAPList();
   draw();
+  renderAPList();
 
   alert('AP actualizado');
 
 });
 
 document.getElementById('render24')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  currentBand = '2.4';
+  currentBand='2.4';
   draw();
 
 });
 
 document.getElementById('render5')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  currentBand = '5';
+  currentBand='5';
   draw();
 
 });
 
 document.getElementById('clearBtn')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
-  if (!confirm('¿Eliminar todos?')) return;
+  if(!confirm('¿Eliminar todos los APs?')) return;
 
-  aps = [];
+  aps=[];
 
-  clearForm();
-  renderAPList();
   draw();
+  renderAPList();
 
 });
 
 document.getElementById('exportBtn')
-.addEventListener('click', () => {
+.addEventListener('click',()=>{
 
   const data = {
     aps,
@@ -932,8 +1009,8 @@ document.getElementById('exportBtn')
   };
 
   const blob = new Blob(
-    [JSON.stringify(data, null, 2)],
-    {type: 'application/json'}
+    [JSON.stringify(data,null,2)],
+    {type:'application/json'}
   );
 
   const url = URL.createObjectURL(blob);
@@ -950,20 +1027,30 @@ document.getElementById('exportBtn')
 });
 
 document.getElementById('importInput')
-.addEventListener('change', e => {
+.addEventListener('change',e=>{
 
   const file = e.target.files[0];
-  if (!file) return;
+  if(!file) return;
 
   const reader = new FileReader();
 
-  reader.onload = evt => {
+  reader.onload = evt=>{
 
     const data =
       JSON.parse(evt.target.result);
 
     aps = data.aps || [];
-    pixelsPerMeter = data.pixelsPerMeter || null;
+
+    aps.forEach(ap=>{
+
+      if(ap.enabled === undefined){
+        ap.enabled = true;
+      }
+
+    });
+
+    pixelsPerMeter =
+      data.pixelsPerMeter || null;
 
     renderAPList();
     draw();
