@@ -13,7 +13,10 @@ La herramienta está diseñada para:
 * Trabajar completamente offline.
 * Exportar e importar proyectos.
 
-La aplicación no utiliza ningún servidor ni realiza conexiones externas.
+La aplicación no utiliza ningún servidor ni realiza conexiones externas. Para ello, es necesario descargar todos los archivos del repositorio. En caso de que no quieras descargar el archivo "xlsx.full.min.js"
+no es estrictamente necesario, pero para ello, tendrás que modificar el código, cambiando la dirección local donde apunta la línea 9 por la dirección "https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"
+pero si lo haces, ya estás haciendo una conexión con un servidor externo (que aunque es 100% seguro, la idea es que esta aplicación funcione sin conexión de ningún tipo, haciéndolo completamente blindado a 
+posibles ataques y amenazas externas).
 
 \------------------------------------------------------------------------------------
 
