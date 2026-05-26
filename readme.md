@@ -481,3 +481,27 @@ Cada fila del Excel incluye:
 Resultado:
 
 Ahora la aplicación permite generar documentación técnica y reportes de cobertura WiFi de forma automática, facilitando auditorías, análisis y comparativas externas mediante hojas de cálculo Excel.
+
+\------------------------------------------------------------------------------------
+
+# 23\. Sistema de zoom del mapa (actualización)
+
+Se ha añadido un nuevo sistema de zoom visual para facilitar la navegación y el análisis sobre mapas grandes y planos complejos.
+
+Funcionalidades añadidas:
+* Botón de ampliar zoom (+)
+* Botón de reducir zoom (-)
+* Botón para restaurar zoom al 100%
+* Escalado visual únicamente del mapa
+* El panel lateral permanece fijo y sin cambios
+* Compatible con scroll horizontal y vertical
+* No modifica cálculos, distancias ni posiciones reales
+* Mejoras visuales
+* Mayor precisión al colocar APs
+* Navegación más cómoda en mapas grandes
+* Mejor visualización de zonas densas
+* Facilita el análisis de cobertura y simulaciones
+  
+Resultado:
+
+* Ahora es posible ampliar o reducir la vista del mapa dinámicamente sin afectar ningún dato técnico del proyecto, mejorando considerablemente la experiencia de uso durante auditorías y simulaciones WiFi.
