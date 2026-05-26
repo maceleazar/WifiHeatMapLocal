@@ -101,6 +101,7 @@ button:hover{
   cursor:crosshair;
   min-width:max-content;
   min-height:max-content;
+  transform-origin: top left;
 }
 
 .toolbar{
@@ -317,8 +318,25 @@ Exportar Excel
 <div class="canvas-container">
 
 <div class="toolbar">
-<button id="render24">Ver 2.4 GHz</button>
-<button id="render5">Ver 5 GHz</button>
+<button id="zoomOutBtn">
+−
+</button>
+
+<button id="zoomInBtn">
++
+</button>
+
+<button id="resetZoomBtn">
+100%
+</button>
+
+<button id="render24">
+Ver 2.4 GHz
+</button>
+
+<button id="render5">
+Ver 5 GHz
+</button>
 </div>
 
 <canvas id="mapCanvas"></canvas>
@@ -340,10 +358,22 @@ let scalePoints = [];
 let pixelsPerMeter = null;
 let selectedApId = null;
 
+let zoom = 1;
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 4;
+
 function resizeCanvasToImage(img){
   canvas.width = img.width;
   canvas.height = img.height;
+  applyZoom();
   draw();
+}
+
+function applyZoom(){
+
+  canvas.style.transform =
+    `scale(${zoom})`;
+
 }
 
 function draw(){
@@ -688,6 +718,41 @@ function deleteAP(id){
 window.editAP = editAP;
 window.toggleAP = toggleAP;
 window.deleteAP = deleteAP;
+
+document.getElementById('zoomInBtn')
+.addEventListener('click',()=>{
+
+  zoom += 0.1;
+
+  if(zoom > MAX_ZOOM){
+    zoom = MAX_ZOOM;
+  }
+
+  applyZoom();
+
+});
+
+document.getElementById('zoomOutBtn')
+.addEventListener('click',()=>{
+
+  zoom -= 0.1;
+
+  if(zoom < MIN_ZOOM){
+    zoom = MIN_ZOOM;
+  }
+
+  applyZoom();
+
+});
+
+document.getElementById('resetZoomBtn')
+.addEventListener('click',()=>{
+
+  zoom = 1;
+
+  applyZoom();
+
+});
 
 document.getElementById('mapInput')
 .addEventListener('change',e=>{
