@@ -1,13 +1,14 @@
+Mapa De Calor Eleazar
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
 <title>Mapa de Calor WiFi</title>
 
-<style>
+<script src="xlsx.full.min.js"></script>
 
+<style>
 *{
   box-sizing:border-box;
 }
@@ -17,7 +18,7 @@ body{
   font-family:Arial,sans-serif;
   background:#0f172a;
   color:#e2e8f0;
-  overflow:hidden;
+  overflow:auto;
 }
 
 .app{
@@ -91,12 +92,16 @@ button:hover{
   position:relative;
   overflow:auto;
   background:#020617;
+  width:100%;
+  height:100vh;
 }
 
 #mapCanvas{
   display:block;
   background:#0b1220;
   cursor:crosshair;
+  min-width:max-content;
+  min-height:max-content;
 }
 
 .toolbar{
@@ -177,7 +182,6 @@ button:hover{
   color:#00ffff;
   font-weight:bold;
 }
-
 </style>
 </head>
 
@@ -188,42 +192,28 @@ button:hover{
 <div class="sidebar">
 
 <div class="section">
-
 <h2>Cargar mapa</h2>
-
 <input type="file" id="mapInput" accept="image/*">
-
 <div class="status" id="mapStatus">
 Sin mapa cargado
 </div>
-
 </div>
 
 <div class="section">
-
 <h2>Escalar plano</h2>
-
 <button id="scaleModeBtn">
 Activar modo escala
 </button>
 
 <label>Distancia real (metros)</label>
-
-<input
-type="number"
-id="realDistance"
-value="10"
-step="0.1"
-/>
+<input type="number" id="realDistance" value="10" step="0.1"/>
 
 <div class="status" id="scaleStatus">
 Escala no definida
 </div>
-
 </div>
 
 <div class="section">
-
 <h2>Access Point</h2>
 
 <div class="status" id="selectedApStatus">
@@ -234,31 +224,25 @@ Ningún AP seleccionado
 <input id="apName">
 
 <div class="grid-2">
-
 <div>
 <label>IP</label>
 <input id="apIp">
 </div>
-
 <div>
 <label>MAC</label>
 <input id="apMac">
 </div>
-
 </div>
 
 <div class="grid-2">
-
 <div>
 <label>Modelo</label>
 <input id="apModel">
 </div>
-
 <div>
 <label>Área</label>
 <input id="apArea">
 </div>
-
 </div>
 
 <button id="placeApBtn">
@@ -266,9 +250,7 @@ Colocar nuevo AP
 </button>
 
 <h3>2.4 GHz</h3>
-
 <div class="grid-4">
-
 <input id="g24_up_5" placeholder="↑5m" type="number">
 <input id="g24_down_5" placeholder="↓5m" type="number">
 <input id="g24_left_5" placeholder="←5m" type="number">
@@ -278,13 +260,10 @@ Colocar nuevo AP
 <input id="g24_down_10" placeholder="↓10m" type="number">
 <input id="g24_left_10" placeholder="←10m" type="number">
 <input id="g24_right_10" placeholder="→10m" type="number">
-
 </div>
 
 <h3>5 GHz</h3>
-
 <div class="grid-4">
-
 <input id="g5_up_5" placeholder="↑5m" type="number">
 <input id="g5_down_5" placeholder="↓5m" type="number">
 <input id="g5_left_5" placeholder="←5m" type="number">
@@ -294,54 +273,43 @@ Colocar nuevo AP
 <input id="g5_down_10" placeholder="↓10m" type="number">
 <input id="g5_left_10" placeholder="←10m" type="number">
 <input id="g5_right_10" placeholder="→10m" type="number">
-
 </div>
 
 <button id="saveApBtn">
 Guardar cambios
 </button>
-
 </div>
 
 <div class="section">
-
 <h2>Access Points</h2>
-
 <div class="ap-list" id="apList"></div>
 
 <button id="clearBtn" style="background:#dc2626">
 Eliminar todos
 </button>
-
 </div>
 
 <div class="section">
-
 <h2>Exportar / Importar</h2>
 
 <button id="exportBtn">
 Exportar JSON
 </button>
 
-<input
-type="file"
-id="importInput"
-accept="application/json"
-/>
+<button id="exportExcelBtn">
+Exportar Excel
+</button>
 
+<input type="file" id="importInput" accept="application/json"/>
 </div>
 
 <div class="section">
-
 <h2>Leyenda</h2>
-
 <div class="gradient"></div>
-
 <div class="legend">
 <span>-100</span>
 <span>-30</span>
 </div>
-
 </div>
 
 </div>
@@ -349,21 +317,13 @@ accept="application/json"
 <div class="canvas-container">
 
 <div class="toolbar">
-
-<button id="render24">
-Ver 2.4 GHz
-</button>
-
-<button id="render5">
-Ver 5 GHz
-</button>
-
+<button id="render24">Ver 2.4 GHz</button>
+<button id="render5">Ver 5 GHz</button>
 </div>
 
 <canvas id="mapCanvas"></canvas>
 
 </div>
-
 </div>
 
 <script>
@@ -372,24 +332,17 @@ const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
 
 let mapImage = null;
-
 let aps = [];
-
 let currentBand = '2.4';
-
 let placingAp = false;
 let scalingMode = false;
-
 let scalePoints = [];
 let pixelsPerMeter = null;
-
 let selectedApId = null;
 
 function resizeCanvasToImage(img){
-
   canvas.width = img.width;
   canvas.height = img.height;
-
   draw();
 }
 
@@ -426,10 +379,8 @@ function drawScalePoints(){
   if(scalePoints.length===2){
 
     ctx.beginPath();
-
     ctx.moveTo(scalePoints[0].x,scalePoints[0].y);
     ctx.lineTo(scalePoints[1].x,scalePoints[1].y);
-
     ctx.stroke();
   }
 
@@ -549,7 +500,6 @@ function drawAPs(){
   aps.forEach(ap=>{
 
     ctx.beginPath();
-
     ctx.arc(ap.x,ap.y,8,0,Math.PI*2);
 
     if(ap.id === selectedApId){
@@ -594,8 +544,7 @@ function findAPAtPosition(x,y){
 
 function renderAPList(){
 
-  const container =
-    document.getElementById('apList');
+  const container = document.getElementById('apList');
 
   container.innerHTML='';
 
@@ -974,18 +923,14 @@ document.getElementById('saveApBtn')
 
 document.getElementById('render24')
 .addEventListener('click',()=>{
-
   currentBand='2.4';
   draw();
-
 });
 
 document.getElementById('render5')
 .addEventListener('click',()=>{
-
   currentBand='5';
   draw();
-
 });
 
 document.getElementById('clearBtn')
@@ -1026,6 +971,57 @@ document.getElementById('exportBtn')
 
 });
 
+document.getElementById('exportExcelBtn')
+.addEventListener('click', () => {
+
+  const rows = [];
+
+  aps.forEach(ap => {
+
+    rows.push({
+
+      Nombre: ap.name,
+
+      "2.4GHz ↑ 5m": ap.signals['2.4'].up5,
+      "2.4GHz ↓ 5m": ap.signals['2.4'].down5,
+      "2.4GHz ← 5m": ap.signals['2.4'].left5,
+      "2.4GHz → 5m": ap.signals['2.4'].right5,
+
+      "2.4GHz ↑ 10m": ap.signals['2.4'].up10,
+      "2.4GHz ↓ 10m": ap.signals['2.4'].down10,
+      "2.4GHz ← 10m": ap.signals['2.4'].left10,
+      "2.4GHz → 10m": ap.signals['2.4'].right10,
+
+      "5GHz ↑ 5m": ap.signals['5'].up5,
+      "5GHz ↓ 5m": ap.signals['5'].down5,
+      "5GHz ← 5m": ap.signals['5'].left5,
+      "5GHz → 5m": ap.signals['5'].right5,
+
+      "5GHz ↑ 10m": ap.signals['5'].up10,
+      "5GHz ↓ 10m": ap.signals['5'].down10,
+      "5GHz ← 10m": ap.signals['5'].left10,
+      "5GHz → 10m": ap.signals['5'].right10
+
+    });
+
+  });
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    'Access Points'
+  );
+
+  XLSX.writeFile(
+    workbook,
+    'wifi_heatmap_aps.xlsx'
+  );
+
+});
+
 document.getElementById('importInput')
 .addEventListener('change',e=>{
 
@@ -1036,8 +1032,7 @@ document.getElementById('importInput')
 
   reader.onload = evt=>{
 
-    const data =
-      JSON.parse(evt.target.result);
+    const data = JSON.parse(evt.target.result);
 
     aps = data.aps || [];
 
@@ -1049,8 +1044,7 @@ document.getElementById('importInput')
 
     });
 
-    pixelsPerMeter =
-      data.pixelsPerMeter || null;
+    pixelsPerMeter = data.pixelsPerMeter || null;
 
     renderAPList();
     draw();
