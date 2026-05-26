@@ -437,3 +437,44 @@ Cambios añadidos:
 Resultado:
 
 Ahora es posible crear distintas simulaciones sobre un mismo Access Point, comparar configuraciones y analizar el impacto de cada cambio de forma rápida y visual, todo funcionando completamente en local.
+
+\------------------------------------------------------------------------------------
+
+# 22\. Exportación de datos a Excel (actualización)
+
+Se ha añadido una nueva función de exportación a Excel (.xlsx) para generar automáticamente una hoja con todas las mediciones registradas de los Access Points.
+
+Funcionalidades añadidas:
+* Exportación automática de todos los APs a Excel
+* Inclusión de todas las mediciones registradas
+* Separación de datos de 2.4 GHz y 5 GHz
+* Exportación de señales a 5m y 10m en todas las direcciones
+* Compatibilidad total con APs activos y desactivados
+* Generación local del archivo sin servidores externos
+* Datos exportados
+
+Cada fila del Excel incluye:
+
+* Nombre del AP
+* Mediciones 2.4 GHz:
+* ↑ 5m
+* ↓ 5m
+* ← 5m
+* → 5m
+* ↑ 10m
+* ↓ 10m
+* ← 10m
+* → 10m
+* Mediciones 5 GHz:
+* ↑ 5m
+* ↓ 5m
+* ← 5m
+* → 5m
+* ↑ 10m
+* ↓ 10m
+* ← 10m
+* → 10m
+  
+Resultado:
+
+Ahora la aplicación permite generar documentación técnica y reportes de cobertura WiFi de forma automática, facilitando auditorías, análisis y comparativas externas mediante hojas de cálculo Excel.
