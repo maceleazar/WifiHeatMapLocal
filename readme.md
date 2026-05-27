@@ -505,3 +505,28 @@ Funcionalidades añadidas:
 Resultado:
 
 * Ahora es posible ampliar o reducir la vista del mapa dinámicamente sin afectar ningún dato técnico del proyecto, mejorando considerablemente la experiencia de uso durante auditorías y simulaciones WiFi.
+
+\------------------------------------------------------------------------------------
+
+# 24\. Sistema de paredes y atenuación de señal (actualización)
+
+Funcionalidades añadidas:
+
+* Herramienta para dibujar paredes directamente sobre el plano
+* Selección de distintos materiales de construcción
+* Aplicación automática de pérdidas de señal según el material
+* Representación visual de paredes mediante colores diferenciados
+* Cálculo dinámico de atenuación sobre el mapa de calor
+* Compatibilidad con exportación e importación de proyectos JSON
+* Materiales soportados
+* Cristal
+* Pladur
+* Ladrillo
+* Hormigón
+* Metal
+
+Cada material aplica una atenuación distinta en dB para simular el comportamiento real de la señal WiFi al atravesar obstáculos físicos.
+
+Resultado:
+
+* Ahora el sistema genera mapas de cobertura mucho más precisos y realistas, permitiendo simular entornos reales de oficinas, viviendas o naves industriales con obstáculos físicos que afectan directamente a la propagación de la señal inalámbrica.
