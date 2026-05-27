@@ -530,3 +530,17 @@ Cada material aplica una atenuación distinta en dB para simular el comportamien
 Resultado:
 
 * Ahora el sistema genera mapas de cobertura mucho más precisos y realistas, permitiendo simular entornos reales de oficinas, viviendas o naves industriales con obstáculos físicos que afectan directamente a la propagación de la señal inalámbrica.
+
+
+\------------------------------------------------------------------------------------
+
+# 24-2\. Mejora en el punto de las paredes  (actualización)
+
+Funcionalidades añadidas:
+
+* Botón para ocultar/mostrar menú
+* Herramienta para poder eliminar muros y paredes
+
+Resultado:
+
+* Ahora puedes ocultar el menú de herramientas para visualizar de manera más cómoda el contenido. También puedes eliminar muros y paredes en caso de haberte equivocado o querer modificarlo.
