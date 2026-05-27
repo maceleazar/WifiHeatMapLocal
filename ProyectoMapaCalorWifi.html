@@ -291,6 +291,46 @@ Eliminar todos
 </div>
 
 <div class="section">
+
+<h2>Paredes</h2>
+
+<button id="drawWallBtn">
+Dibujar pared
+</button>
+
+<label>Material</label>
+
+<select id="wallMaterial">
+
+<option value="glass">
+Cristal
+</option>
+
+<option value="drywall">
+Pladur
+</option>
+
+<option value="brick">
+Ladrillo
+</option>
+
+<option value="concrete">
+Hormigón
+</option>
+
+<option value="metal">
+Metal
+</option>
+
+</select>
+
+<div class="status" id="wallStatus">
+Sin dibujar
+</div>
+
+</div>
+
+<div class="section">
 <h2>Exportar / Importar</h2>
 
 <button id="exportBtn">
@@ -357,6 +397,17 @@ let scalingMode = false;
 let scalePoints = [];
 let pixelsPerMeter = null;
 let selectedApId = null;
+let walls = [];
+let drawingWall = false;
+let wallPoints = [];
+
+const wallMaterials = {
+  glass: 2,
+  drywall: 3,
+  brick: 6,
+  concrete: 12,
+  metal: 20,
+}
 
 let zoom = 1;
 const MIN_ZOOM = 0.2;
@@ -385,8 +436,62 @@ function draw(){
   }
 
   renderHeatmap();
+  drawWalls();
   drawAPs();
   drawScalePoints();
+
+  function drawWalls(){
+
+  ctx.save();
+
+  walls.forEach(wall=>{
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+      wall.x1,
+      wall.y1
+    );
+
+    ctx.lineTo(
+      wall.x2,
+      wall.y2
+    );
+
+    switch(wall.material){
+
+      case 'glass':
+        ctx.strokeStyle='#38bdf8';
+        break;
+
+      case 'drywall':
+        ctx.strokeStyle='#facc15';
+        break;
+
+      case 'brick':
+        ctx.strokeStyle='#ea580c';
+        break;
+
+      case 'concrete':
+        ctx.strokeStyle='#94a3b8';
+        break;
+
+      case 'metal':
+        ctx.strokeStyle='#e11d48';
+        break;
+
+    }
+
+    ctx.lineWidth = 5;
+
+    ctx.stroke();
+
+  });
+
+  ctx.restore();
+
+}
+
 }
 
 function drawScalePoints(){
@@ -429,6 +534,66 @@ function dbToColor(db){
 
 function interpolate(a,b,t){
   return a + (b-a)*t;
+}
+
+function lineIntersectsWall(
+  x1,y1,
+  x2,y2,
+  wall
+){
+
+  function ccw(ax,ay,bx,by,cx,cy){
+
+    return (
+      cy-ay
+    ) * (
+      bx-ax
+    ) > (
+      by-ay
+    ) * (
+      cx-ax
+    );
+
+  }
+
+  return (
+
+    ccw(
+      x1,y1,
+      wall.x1,wall.y1,
+      wall.x2,wall.y2
+    )
+
+    !=
+
+    ccw(
+      x2,y2,
+      wall.x1,wall.y1,
+      wall.x2,wall.y2
+    )
+
+  )
+
+  &&
+
+  (
+
+    ccw(
+      x1,y1,
+      x2,y2,
+      wall.x1,wall.y1
+    )
+
+    !=
+
+    ccw(
+      x1,y1,
+      x2,y2,
+      wall.x2,wall.y2
+    )
+
+  );
+
 }
 
 function getSignalAtDistance(ap,dx,dy,band){
@@ -479,7 +644,32 @@ function getSignalAtDistance(ap,dx,dy,band){
     return interpolate(dir5,dir10,(meters-5)/5);
   }
 
-  return dir10 - ((meters-10)*2);
+  let finalSignal =
+  dir10 - ((meters-10)*2);
+
+walls.forEach(wall=>{
+
+  const intersects =
+    lineIntersectsWall(
+      ap.x,
+      ap.y,
+      ap.x + dx,
+      ap.y + dy,
+      wall
+    );
+
+  if(intersects){
+
+    finalSignal -=
+      wallMaterials[
+        wall.material
+      ];
+
+  }
+
+});
+
+return finalSignal;
 }
 
 function renderHeatmap(){
@@ -719,6 +909,22 @@ window.editAP = editAP;
 window.toggleAP = toggleAP;
 window.deleteAP = deleteAP;
 
+document.getElementById('drawWallBtn')
+.addEventListener('click',()=>{
+
+  drawingWall = true;
+
+  placingAp = false;
+  scalingMode = false;
+
+  wallPoints = [];
+
+  alert(
+    'Selecciona inicio y final de la pared'
+  );
+
+});
+
 document.getElementById('zoomInBtn')
 .addEventListener('click',()=>{
 
@@ -810,6 +1016,40 @@ canvas.addEventListener('click',e=>{
 
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
+
+  if(drawingWall){
+
+    wallPoints.push({x,y});
+
+  if(wallPoints.length===2){
+
+    walls.push({
+
+      x1: wallPoints[0].x,
+      y1: wallPoints[0].y,
+
+      x2: wallPoints[1].x,
+      y2: wallPoints[1].y,
+
+      material:
+        document.getElementById(
+          'wallMaterial'
+        ).value
+
+    });
+
+    drawingWall = false;
+
+    document.getElementById('wallStatus')
+    .innerText =
+      `Paredes: ${walls.length}`;
+
+  }
+
+  draw();
+
+  return;
+}
 
   if(scalingMode){
 
@@ -1014,9 +1254,10 @@ document.getElementById('exportBtn')
 .addEventListener('click',()=>{
 
   const data = {
-    aps,
-    pixelsPerMeter
-  };
+  aps,
+  walls,
+  pixelsPerMeter
+};
 
   const blob = new Blob(
     [JSON.stringify(data,null,2)],
@@ -1110,6 +1351,7 @@ document.getElementById('importInput')
     });
 
     pixelsPerMeter = data.pixelsPerMeter || null;
+    walls = data.walls || [];
 
     renderAPList();
     draw();
