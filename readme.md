@@ -544,3 +544,23 @@ Funcionalidades añadidas:
 Resultado:
 
 * Ahora puedes ocultar el menú de herramientas para visualizar de manera más cómoda el contenido. También puedes eliminar muros y paredes en caso de haberte equivocado o querer modificarlo.
+
+\------------------------------------------------------------------------------------
+
+# 24-3\. Mejora en los APs y las paredes  (actualización)
+
+Mover APs/paredes con drag & drop. Funciones añadidas:
+
+APs:
+
+* seleccionar AP
+* Arrastrarlo
+* Reposicionarlo
+* Actualizar heatmap en tiempo real
+
+Paredes:
+
+* Seleccionar pared
+* Moverla completa
+* Mantener longitud/orientación
+* Recalcular atenuación automáticamente
