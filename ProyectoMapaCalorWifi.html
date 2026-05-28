@@ -461,6 +461,16 @@ let drawingWall = false;
 let wallPoints = [];
 let selectedWallIndex = null;
 
+let draggingAp = null;
+
+let draggingWall = null;
+
+let wallDragStartX = 0;
+let wallDragStartY = 0;
+
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+
 const wallMaterials = {
   glass: 2,
   drywall: 3,
@@ -1022,6 +1032,26 @@ function toggleAP(id){
   renderAPList();
 }
 
+function findAPAtPosition(x,y){
+
+  for(const ap of aps){
+
+    const dx = x - ap.x;
+    const dy = y - ap.y;
+
+    const dist =
+      Math.sqrt(dx*dx + dy*dy);
+
+    if(dist <= 10){
+      return ap;
+    }
+
+  }
+
+  return null;
+
+}
+
 function deleteAP(id){
 
   aps = aps.filter(a=>a.id!==id);
@@ -1167,12 +1197,129 @@ document.getElementById('placeApBtn')
 
 });
 
+canvas.addEventListener(
+  'mousedown',
+  e=>{
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+    const x =
+      (e.clientX - rect.left) / zoom;
+
+    const y =
+      (e.clientY - rect.top) / zoom;
+
+    const clickedAp =
+      findAPAtPosition(x,y);
+
+    const clickedWallIndex =
+  findWallAtPosition(x,y);
+
+if(clickedWallIndex !== null){
+
+  draggingWall =
+    walls[clickedWallIndex];
+
+  wallDragStartX = x;
+  wallDragStartY = y;
+
+  selectedWallIndex =
+    clickedWallIndex;
+
+  draw();
+
+  return;
+
+}
+
+    if(clickedAp){
+
+      draggingAp = clickedAp;
+
+      dragOffsetX =
+        x - clickedAp.x;
+
+      dragOffsetY =
+        y - clickedAp.y;
+
+    }
+
+  }
+);
+
+canvas.addEventListener(
+  'mousemove',
+  e=>{
+
+    if(!draggingAp && !draggingWall){
+  return;
+}
+
+    const rect =
+      canvas.getBoundingClientRect();
+
+    const x =
+      (e.clientX - rect.left) / zoom;
+
+    const y =
+      (e.clientY - rect.top) / zoom;
+
+if(draggingWall){
+
+  const dx =
+    x - wallDragStartX;
+
+  const dy =
+    y - wallDragStartY;
+
+  draggingWall.x1 += dx;
+  draggingWall.y1 += dy;
+
+  draggingWall.x2 += dx;
+  draggingWall.y2 += dy;
+
+  wallDragStartX = x;
+  wallDragStartY = y;
+
+  draw();
+
+  return;
+
+}
+
+    draggingAp.x =
+      x - dragOffsetX;
+
+    draggingAp.y =
+      y - dragOffsetY;
+
+    draw();
+
+    renderAPList();
+
+  }
+);
+
+canvas.addEventListener(
+  'mouseup',
+  ()=>{
+
+    draggingWall = null;
+    draggingAp = null;
+
+  }
+);
+
 canvas.addEventListener('click',e=>{
 
   const rect = canvas.getBoundingClientRect();
 
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x =
+  (e.clientX - rect.left) / zoom;
+
+const y =
+  (e.clientY - rect.top) / zoom;
 
   if(drawingWall){
 
