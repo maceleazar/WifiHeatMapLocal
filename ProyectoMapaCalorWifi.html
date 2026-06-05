@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mapa de Calor WiFi</title>
+<title>Mapa de Calor WiFi - Eleazar</title>
 
-<script src="xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 *{
@@ -31,7 +31,6 @@ body{
   border-right:1px solid #334155;
   padding:16px;
   overflow-y:auto;
-
   padding-top:70px;
 }
 
@@ -186,49 +185,31 @@ button:hover{
 }
 
 #toggleSidebarBtn{
-
   position:fixed;
-
   top:12px;
   left:12px;
-
   width:42px;
   height:42px;
-
   border:none;
   border-radius:10px;
-
   background:#111827;
-
   color:white;
-
   font-size:22px;
-
   cursor:pointer;
-
   z-index:9999;
-
-  box-shadow:
-    0 0 10px rgba(0,0,0,0.4);
-
+  box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
 
 #toggleSidebarBtn:hover{
-
   background:#1e293b;
-
 }
 
 .sidebar.hidden{
-
   display:none;
-
 }
 
 .app.fullscreen{
-
   grid-template-columns: 1fr;
-
 }
 </style>
 </head>
@@ -236,217 +217,142 @@ button:hover{
 <body>
 
 <div class="app">
+  <button id="toggleSidebarBtn">☰</button>
 
-  <button id="toggleSidebarBtn">
-☰
-</button>
+  <div class="sidebar">
+    <div class="section">
+      <strong>Mapa De Calor app de Eleazar</strong>
+      <h2>Cargar mapa</h2>
+      <input type="file" id="mapInput" accept="image/*">
+      <div class="status" id="mapStatus">Sin mapa cargado</div>
+    </div>
 
-<div class="sidebar">
+    <div class="section">
+      <h2>Escalar plano</h2>
+      <button id="scaleModeBtn">Activar modo escala</button>
+      <label>Distancia real (metros)</label>
+      <input type="number" id="realDistance" value="10" step="0.1"/>
+      <div class="status" id="scaleStatus">Escala no definida</div>
+    </div>
 
-<div class="section">
-<strong>Mapa De Calor app de Eleazar</strong>
-<h2>Cargar mapa</h2>
-<input type="file" id="mapInput" accept="image/*">
-<div class="status" id="mapStatus">
-Sin mapa cargado
-</div>
-</div>
+    <div class="section">
+      <h2>Access Point</h2>
+      <div class="status" id="selectedApStatus">Ningún AP seleccionado</div>
 
-<div class="section">
-<h2>Escalar plano</h2>
-<button id="scaleModeBtn">
-Activar modo escala
-</button>
+      <label>Nombre</label>
+      <input id="apName" value="AP-Principal">
 
-<label>Distancia real (metros)</label>
-<input type="number" id="realDistance" value="10" step="0.1"/>
+      <div class="grid-2">
+        <div>
+          <label>IP</label>
+          <input id="apIp" value="192.168.1.254">
+        </div>
+        <div>
+          <label>MAC</label>
+          <input id="apMac" value="00:1A:2B:3C:4D:5E">
+        </div>
+      </div>
 
-<div class="status" id="scaleStatus">
-Escala no definida
-</div>
-</div>
+      <div class="grid-2">
+        <div>
+          <label>Modelo</label>
+          <input id="apModel" value="WiFi 6 AP">
+        </div>
+        <div>
+          <label>Área</label>
+          <input id="apArea" value="Oficina">
+        </div>
+      </div>
 
-<div class="section">
-<h2>Access Point</h2>
+      <button id="placeApBtn">Colocar nuevo AP</button>
 
-<div class="status" id="selectedApStatus">
-Ningún AP seleccionado
-</div>
+      <h3>2.4 GHz</h3>
+      <div class="grid-4">
+        <input id="g24_up_5" placeholder="↑5m" type="number" value="-55">
+        <input id="g24_down_5" placeholder="↓5m" type="number" value="-55">
+        <input id="g24_left_5" placeholder="←5m" type="number" value="-55">
+        <input id="g24_right_5" placeholder="→5m" type="number" value="-55">
 
-<label>Nombre</label>
-<input id="apName">
+        <input id="g24_up_10" placeholder="↑10m" type="number" value="-70">
+        <input id="g24_down_10" placeholder="↓10m" type="number" value="-70">
+        <input id="g24_left_10" placeholder="←10m" type="number" value="-70">
+        <input id="g24_right_10" placeholder="→10m" type="number" value="-70">
+      </div>
 
-<div class="grid-2">
-<div>
-<label>IP</label>
-<input id="apIp">
-</div>
-<div>
-<label>MAC</label>
-<input id="apMac">
-</div>
-</div>
+      <h3>5 GHz</h3>
+      <div class="grid-4">
+        <input id="g5_up_5" placeholder="↑5m" type="number" value="-62">
+        <input id="g5_down_5" placeholder="↓5m" type="number" value="-62">
+        <input id="g5_left_5" placeholder="←5m" type="number" value="-62">
+        <input id="g5_right_5" placeholder="→5m" type="number" value="-62">
 
-<div class="grid-2">
-<div>
-<label>Modelo</label>
-<input id="apModel">
-</div>
-<div>
-<label>Área</label>
-<input id="apArea">
-</div>
-</div>
+        <input id="g5_up_10" placeholder="↑10m" type="number" value="-78">
+        <input id="g5_down_10" placeholder="↓10m" type="number" value="-78">
+        <input id="g5_left_10" placeholder="←10m" type="number" value="-78">
+        <input id="g5_right_10" placeholder="→10m" type="number" value="-78">
+      </div>
 
-<button id="placeApBtn">
-Colocar nuevo AP
-</button>
+      <button id="saveApBtn">Guardar cambios</button>
+    </div>
 
-<h3>2.4 GHz</h3>
-<div class="grid-4">
-<input id="g24_up_5" placeholder="↑5m" type="number">
-<input id="g24_down_5" placeholder="↓5m" type="number">
-<input id="g24_left_5" placeholder="←5m" type="number">
-<input id="g24_right_5" placeholder="→5m" type="number">
+    <div class="section">
+      <h2>Access Points</h2>
+      <div class="ap-list" id="apList"></div>
+      <button id="clearBtn" style="background:#dc2626">Eliminar todos</button>
+    </div>
 
-<input id="g24_up_10" placeholder="↑10m" type="number">
-<input id="g24_down_10" placeholder="↓10m" type="number">
-<input id="g24_left_10" placeholder="←10m" type="number">
-<input id="g24_right_10" placeholder="→10m" type="number">
-</div>
+    <div class="section">
+      <h2>Paredes</h2>
+      <button id="drawWallBtn">Dibujar pared</button>
+      <label>Material</label>
+      <select id="wallMaterial">
+        <option value="glass">Cristal</option>
+        <option value="drywall">Pladur</option>
+        <option value="brick">Ladrillo</option>
+        <option value="concrete">Hormigón</option>
+        <option value="metal">Metal</option>
+      </select>
+      <div class="status" id="wallStatus">Paredes: 0</div>
+      <button id="deleteWallBtn" style="background:#dc2626">Eliminar pared seleccionada</button>
+    </div>
 
-<h3>5 GHz</h3>
-<div class="grid-4">
-<input id="g5_up_5" placeholder="↑5m" type="number">
-<input id="g5_down_5" placeholder="↓5m" type="number">
-<input id="g5_left_5" placeholder="←5m" type="number">
-<input id="g5_right_5" placeholder="→5m" type="number">
+    <div class="section">
+      <h2>Exportar / Importar</h2>
+      <button id="exportBtn">Exportar JSON</button>
+      <button id="exportExcelBtn">Exportar Excel</button>
+      <input type="file" id="importInput" accept="application/json"/>
+    </div>
 
-<input id="g5_up_10" placeholder="↑10m" type="number">
-<input id="g5_down_10" placeholder="↓10m" type="number">
-<input id="g5_left_10" placeholder="←10m" type="number">
-<input id="g5_right_10" placeholder="→10m" type="number">
-</div>
+    <div class="section">
+      <h2>Leyenda (Intensidad)</h2>
+      <div class="gradient"></div>
+      <div class="legend">
+        <span>Mal (-100 dBm)</span>
+        <span>Excelente (-30 dBm)</span>
+      </div>
+    </div>
+  </div>
 
-<button id="saveApBtn">
-Guardar cambios
-</button>
-</div>
-
-<div class="section">
-<h2>Access Points</h2>
-<div class="ap-list" id="apList"></div>
-
-<button id="clearBtn" style="background:#dc2626">
-Eliminar todos
-</button>
-</div>
-
-<div class="section">
-
-<h2>Paredes</h2>
-
-<button id="drawWallBtn">
-Dibujar pared
-</button>
-
-<label>Material</label>
-
-<select id="wallMaterial">
-
-<option value="glass">
-Cristal
-</option>
-
-<option value="drywall">
-Pladur
-</option>
-
-<option value="brick">
-Ladrillo
-</option>
-
-<option value="concrete">
-Hormigón
-</option>
-
-<option value="metal">
-Metal
-</option>
-
-</select>
-
-<div class="status" id="wallStatus">
-Sin dibujar
-</div>
-
-<button id="deleteWallBtn"
-style="background:#dc2626">
-
-Eliminar pared seleccionada
-
-</button>
-
-</div>
-
-<div class="section">
-<h2>Exportar / Importar</h2>
-
-<button id="exportBtn">
-Exportar JSON
-</button>
-
-<button id="exportExcelBtn">
-Exportar Excel
-</button>
-
-<input type="file" id="importInput" accept="application/json"/>
-</div>
-
-<div class="section">
-<h2>Leyenda</h2>
-<div class="gradient"></div>
-<div class="legend">
-<span>-100</span>
-<span>-30</span>
-</div>
-</div>
-
-</div>
-
-<div class="canvas-container">
-
-<div class="toolbar">
-<button id="zoomOutBtn">
-−
-</button>
-
-<button id="zoomInBtn">
-+
-</button>
-
-<button id="resetZoomBtn">
-100%
-</button>
-
-<button id="render24">
-Ver 2.4 GHz
-</button>
-
-<button id="render5">
-Ver 5 GHz
-</button>
-</div>
-
-<canvas id="mapCanvas"></canvas>
-
-</div>
+  <div class="canvas-container">
+    <div class="toolbar">
+      <button id="zoomOutBtn">−</button>
+      <button id="zoomInBtn">+</button>
+      <button id="resetZoomBtn">100%</button>
+      <button id="render24">Ver 2.4 GHz</button>
+      <button id="render5">Ver 5 GHz</button>
+    </div>
+    <canvas id="mapCanvas"></canvas>
+  </div>
 </div>
 
 <script>
-
 const canvas = document.getElementById('mapCanvas');
 const ctx = canvas.getContext('2d');
+
+// Sistema de Caché para optimizar rendimiento del renderizado
+let heatmapCacheCanvas = document.createElement('canvas');
+let heatmapCacheCtx = heatmapCacheCanvas.getContext('2d');
+let cacheValido = false; 
 
 let mapImage = null;
 let aps = [];
@@ -462,12 +368,9 @@ let wallPoints = [];
 let selectedWallIndex = null;
 
 let draggingAp = null;
-
 let draggingWall = null;
-
 let wallDragStartX = 0;
 let wallDragStartY = 0;
-
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 
@@ -477,7 +380,7 @@ const wallMaterials = {
   brick: 6,
   concrete: 12,
   metal: 20,
-}
+};
 
 let zoom = 1;
 const MIN_ZOOM = 0.2;
@@ -486,19 +389,18 @@ const MAX_ZOOM = 4;
 function resizeCanvasToImage(img){
   canvas.width = img.width;
   canvas.height = img.height;
+  heatmapCacheCanvas.width = img.width;
+  heatmapCacheCanvas.height = img.height;
+  cacheValido = false;
   applyZoom();
   draw();
 }
 
 function applyZoom(){
-
-  canvas.style.transform =
-    `scale(${zoom})`;
-
+  canvas.style.transform = `scale(${zoom})`;
 }
 
 function draw(){
-
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   if(mapImage){
@@ -509,99 +411,55 @@ function draw(){
   drawWalls();
   drawAPs();
   drawScalePoints();
-
-  function drawWalls(){
-
-  ctx.save();
-
-  walls.forEach(wall=>{
-
-    ctx.beginPath();
-
-    ctx.moveTo(
-      wall.x1,
-      wall.y1
-    );
-
-    ctx.lineTo(
-      wall.x2,
-      wall.y2
-    );
-
-    switch(wall.material){
-
-      case 'glass':
-        ctx.strokeStyle='#38bdf8';
-        break;
-
-      case 'drywall':
-        ctx.strokeStyle='#facc15';
-        break;
-
-      case 'brick':
-        ctx.strokeStyle='#ea580c';
-        break;
-
-      case 'concrete':
-        ctx.strokeStyle='#94a3b8';
-        break;
-
-      case 'metal':
-        ctx.strokeStyle='#e11d48';
-        break;
-
-    }
-
-    ctx.lineWidth =
-  wall === walls[selectedWallIndex]
-    ? 9
-    : 5;
-
-    ctx.stroke();
-
-  });
-
-  ctx.restore();
-
 }
 
+function drawWalls(){
+  ctx.save();
+  walls.forEach((wall, index)=>{
+    ctx.beginPath();
+    ctx.moveTo(wall.x1, wall.y1);
+    ctx.lineTo(wall.x2, wall.y2);
+
+    switch(wall.material){
+      case 'glass': ctx.strokeStyle='#38bdf8'; break;
+      case 'drywall': ctx.strokeStyle='#facc15'; break;
+      case 'brick': ctx.strokeStyle='#ea580c'; break;
+      case 'concrete': ctx.strokeStyle='#94a3b8'; break;
+      case 'metal': ctx.strokeStyle='#e11d48'; break;
+    }
+
+    ctx.lineWidth = index === selectedWallIndex ? 9 : 5;
+    ctx.stroke();
+  });
+  ctx.restore();
 }
 
 function drawScalePoints(){
-
   if(scalePoints.length===0) return;
 
   ctx.save();
-
   ctx.fillStyle='#00ffff';
   ctx.strokeStyle='#00ffff';
+  ctx.lineWidth = 3;
 
   scalePoints.forEach(p=>{
-
     ctx.beginPath();
     ctx.arc(p.x,p.y,8,0,Math.PI*2);
     ctx.fill();
-
   });
 
   if(scalePoints.length===2){
-
     ctx.beginPath();
     ctx.moveTo(scalePoints[0].x,scalePoints[0].y);
     ctx.lineTo(scalePoints[1].x,scalePoints[1].y);
     ctx.stroke();
   }
-
   ctx.restore();
 }
 
 function dbToColor(db){
-
-  const normalized =
-    Math.max(0,Math.min(1,(db+100)/70));
-
-  const hue = normalized * 240;
-
+  const normalized = Math.max(0,Math.min(1,(db+100)/70));
+  const hue = normalized * 240; 
   return `hsla(${hue},100%,50%,0.35)`;
 }
 
@@ -609,70 +467,16 @@ function interpolate(a,b,t){
   return a + (b-a)*t;
 }
 
-function lineIntersectsWall(
-  x1,y1,
-  x2,y2,
-  wall
-){
-
+function lineIntersectsWall(x1,y1,x2,y2,wall){
   function ccw(ax,ay,bx,by,cx,cy){
-
-    return (
-      cy-ay
-    ) * (
-      bx-ax
-    ) > (
-      by-ay
-    ) * (
-      cx-ax
-    );
-
+    return (cy-ay) * (bx-ax) > (by-ay) * (cx-ax);
   }
-
-  return (
-
-    ccw(
-      x1,y1,
-      wall.x1,wall.y1,
-      wall.x2,wall.y2
-    )
-
-    !=
-
-    ccw(
-      x2,y2,
-      wall.x1,wall.y1,
-      wall.x2,wall.y2
-    )
-
-  )
-
-  &&
-
-  (
-
-    ccw(
-      x1,y1,
-      x2,y2,
-      wall.x1,wall.y1
-    )
-
-    !=
-
-    ccw(
-      x1,y1,
-      x2,y2,
-      wall.x2,wall.y2
-    )
-
-  );
-
+  return (ccw(x1,y1,wall.x1,wall.y1,wall.x2,wall.y2) != ccw(x2,y2,wall.x1,wall.y1,wall.x2,wall.y2)) &&
+         (ccw(x1,y1,x2,y2,wall.x1,wall.y1) != ccw(x1,y1,x2,y2,wall.x2,wall.y2));
 }
 
 function getSignalAtDistance(ap,dx,dy,band){
-
   const data = ap.signals[band];
-
   const dist = Math.sqrt(dx*dx + dy*dy);
 
   if(dist===0) return -30;
@@ -684,114 +488,74 @@ function getSignalAtDistance(ap,dx,dy,band){
   let dir10;
 
   if(deg>=-45 && deg<45){
-
-    dir5=data.right5;
-    dir10=data.right10;
-
+    dir5=data.right5; dir10=data.right10;
   }else if(deg>=45 && deg<135){
-
-    dir5=data.down5;
-    dir10=data.down10;
-
+    dir5=data.down5; dir10=data.down10;
   }else if(deg>=-135 && deg<-45){
-
-    dir5=data.up5;
-    dir10=data.up10;
-
+    dir5=data.up5; dir10=data.up10;
   }else{
-
-    dir5=data.left5;
-    dir10=data.left10;
+    dir5=data.left5; dir10=data.left10;
   }
 
-  const meters =
-    pixelsPerMeter
-      ? dist / pixelsPerMeter
-      : dist / 50;
+  const meters = pixelsPerMeter ? dist / pixelsPerMeter : dist / 50;
 
+  let finalSignal;
   if(meters<=5){
-    return interpolate(-30,dir5,meters/5);
+    finalSignal = interpolate(-30,dir5,meters/5);
+  } else if(meters<=10){
+    finalSignal = interpolate(dir5,dir10,(meters-5)/5);
+  } else {
+    finalSignal = dir10 - ((meters-10)*2);
   }
 
-  if(meters<=10){
-    return interpolate(dir5,dir10,(meters-5)/5);
-  }
+  // Pérdida de señal por colisión con paredes dibujadas
+  walls.forEach(wall=>{
+    const intersects = lineIntersectsWall(ap.x, ap.y, ap.x + dx, ap.y + dy, wall);
+    if(intersects){
+      finalSignal -= wallMaterials[wall.material];
+    }
+  });
 
-  let finalSignal =
-  dir10 - ((meters-10)*2);
-
-walls.forEach(wall=>{
-
-  const intersects =
-    lineIntersectsWall(
-      ap.x,
-      ap.y,
-      ap.x + dx,
-      ap.y + dy,
-      wall
-    );
-
-  if(intersects){
-
-    finalSignal -=
-      wallMaterials[
-        wall.material
-      ];
-
-  }
-
-});
-
-return finalSignal;
+  return finalSignal;
 }
 
 function renderHeatmap(){
-
   if(!mapImage) return;
 
+  // Si el caché es válido estampa la imagen precalculada directamente sin repetir bucles
+  if(cacheValido){
+    ctx.drawImage(heatmapCacheCanvas, 0, 0);
+    return;
+  }
+
+  heatmapCacheCtx.clearRect(0,0,heatmapCacheCanvas.width,heatmapCacheCanvas.height);
   const step = 12;
 
   for(let y=0;y<canvas.height;y+=step){
-
     for(let x=0;x<canvas.width;x+=step){
-
       let strongest = -120;
 
       aps.forEach(ap=>{
-
         if(!ap.enabled) return;
-
-        const signal =
-          getSignalAtDistance(
-            ap,
-            x-ap.x,
-            y-ap.y,
-            currentBand
-          );
-
+        const signal = getSignalAtDistance(ap, x-ap.x, y-ap.y, currentBand);
         if(signal > strongest){
           strongest = signal;
         }
-
       });
 
       if(strongest > -100){
-
-        ctx.fillStyle = dbToColor(strongest);
-        ctx.fillRect(x,y,step,step);
-
+        heatmapCacheCtx.fillStyle = dbToColor(strongest);
+        heatmapCacheCtx.fillRect(x,y,step,step);
       }
-
     }
-
   }
 
+  cacheValido = true;
+  ctx.drawImage(heatmapCacheCanvas, 0, 0);
 }
 
 function drawAPs(){
-
   aps.forEach(ap=>{
-
     ctx.beginPath();
     ctx.arc(ap.x,ap.y,8,0,Math.PI*2);
 
@@ -804,188 +568,93 @@ function drawAPs(){
     }
 
     ctx.fill();
-
     ctx.strokeStyle='#000';
     ctx.stroke();
 
     ctx.fillStyle='#fff';
     ctx.font='12px Arial';
-
-    const text =
-      ap.enabled
-        ? ap.name
-        : `[OFF] ${ap.name}`;
-
+    const text = ap.enabled ? ap.name : `[OFF] ${ap.name}`;
     ctx.fillText(text,ap.x+12,ap.y-12);
-
   });
-
-}
-
-function findAPAtPosition(x,y){
-
-  return aps.find(ap=>{
-
-    const dx = x-ap.x;
-    const dy = y-ap.y;
-
-    return Math.sqrt(dx*dx + dy*dy) <= 12;
-
-  });
-
 }
 
 function distanceToSegment(px,py,x1,y1,x2,y2){
-
   const A = px - x1;
   const B = py - y1;
-
   const C = x2 - x1;
   const D = y2 - y1;
 
   const dot = A * C + B * D;
   const lenSq = C * C + D * D;
-
   let param = -1;
 
-  if(lenSq !== 0){
-    param = dot / lenSq;
-  }
+  if(lenSq !== 0) param = dot / lenSq;
 
   let xx,yy;
-
   if(param < 0){
-
-    xx = x1;
-    yy = y1;
-
+    xx = x1; yy = y1;
   }else if(param > 1){
-
-    xx = x2;
-    yy = y2;
-
+    xx = x2; yy = y2;
   }else{
-
     xx = x1 + param * C;
     yy = y1 + param * D;
-
   }
 
   const dx = px - xx;
   const dy = py - yy;
-
   return Math.sqrt(dx*dx + dy*dy);
+}
 
+function findAPAtPosition(x,y){
+  return aps.find(ap=>{
+    const dx = x-ap.x;
+    const dy = y-ap.y;
+    return Math.sqrt(dx*dx + dy*dy) <= 12;
+  });
 }
 
 function findWallAtPosition(x,y){
-
   for(let i=0;i<walls.length;i++){
-
     const wall = walls[i];
-
-    const dist =
-      distanceToSegment(
-        x,y,
-        wall.x1,wall.y1,
-        wall.x2,wall.y2
-      );
-
-    if(dist <= 8){
-      return i;
-    }
-
+    const dist = distanceToSegment(x,y,wall.x1,wall.y1,wall.x2,wall.y2);
+    if(dist <= 8) return i;
   }
-
   return null;
-
 }
 
 function renderAPList(){
-
   const container = document.getElementById('apList');
-
   container.innerHTML='';
 
   aps.forEach(ap=>{
-
     const div = document.createElement('div');
-
-    div.className =
-      ap.enabled
-        ? 'ap-item'
-        : 'ap-item ap-disabled';
+    div.className = ap.enabled ? 'ap-item' : 'ap-item ap-disabled';
 
     div.innerHTML = `
-
-      <div class="${
-        ap.id===selectedApId
-          ? 'selected-marker'
-          : ''
-      }">
-
-      <strong>${ap.name}</strong>
-
+      <div class="${ap.id===selectedApId ? 'selected-marker' : ''}">
+        <strong>${ap.name}</strong>
       </div>
-
       Área: ${ap.area || '-'}<br>
       IP: ${ap.ip || '-'}<br>
       MAC: ${ap.mac || '-'}<br>
       Modelo: ${ap.model || '-'}<br>
-
-      Posición:
-      (${Math.round(ap.x)}, ${Math.round(ap.y)})
-
-      <br><br>
-
-      <button
-        class="small-btn"
-        onclick="editAP('${ap.id}')"
-      >
-        Editar
+      Posición: (${Math.round(ap.x)}, ${Math.round(ap.y)})<br><br>
+      <button class="small-btn" onclick="editAP('${ap.id}')">Editar</button>
+      <button class="small-btn ${ap.enabled ? 'toggle-on' : 'toggle-off'}" onclick="toggleAP('${ap.id}')">
+        ${ap.enabled ? 'Desactivar' : 'Activar'}
       </button>
-
-      <button
-        class="small-btn ${
-          ap.enabled
-            ? 'toggle-on'
-            : 'toggle-off'
-        }"
-        onclick="toggleAP('${ap.id}')"
-      >
-        ${
-          ap.enabled
-            ? 'Desactivar'
-            : 'Activar'
-        }
-      </button>
-
-      <button
-        class="small-btn"
-        style="background:#dc2626"
-        onclick="deleteAP('${ap.id}')"
-      >
-        Eliminar
-      </button>
-
+      <button class="small-btn" style="background:#dc2626" onclick="deleteAP('${ap.id}')">Eliminar</button>
     `;
-
     container.appendChild(div);
-
   });
-
 }
 
 function editAP(id){
-
   const ap = aps.find(a=>a.id===id);
-
   if(!ap) return;
 
   selectedApId = id;
-
-  document.getElementById('selectedApStatus').innerText =
-    `Editando: ${ap.name}`;
+  document.getElementById('selectedApStatus').innerText = `Editando: ${ap.name}`;
 
   document.getElementById('apName').value = ap.name || '';
   document.getElementById('apIp').value = ap.ip || '';
@@ -1021,666 +690,397 @@ function editAP(id){
 }
 
 function toggleAP(id){
-
   const ap = aps.find(a=>a.id===id);
-
   if(!ap) return;
 
   ap.enabled = !ap.enabled;
-
+  cacheValido = false; 
   draw();
   renderAPList();
-}
-
-function findAPAtPosition(x,y){
-
-  for(const ap of aps){
-
-    const dx = x - ap.x;
-    const dy = y - ap.y;
-
-    const dist =
-      Math.sqrt(dx*dx + dy*dy);
-
-    if(dist <= 10){
-      return ap;
-    }
-
-  }
-
-  return null;
-
 }
 
 function deleteAP(id){
-
   aps = aps.filter(a=>a.id!==id);
-
   if(selectedApId===id){
     selectedApId=null;
+    document.getElementById('selectedApStatus').innerText = "Ningún AP seleccionado";
   }
-
+  cacheValido = false; 
   draw();
   renderAPList();
 }
 
+// Inyección global de funciones para el DOM dinámico
 window.editAP = editAP;
 window.toggleAP = toggleAP;
 window.deleteAP = deleteAP;
 
-const sidebar =
-  document.querySelector('.sidebar');
+// Event Listeners de Interfaz
+const sidebar = document.querySelector('.sidebar');
+const app = document.querySelector('.app');
 
-const app =
-  document.querySelector('.app');
-
-document.getElementById(
-  'toggleSidebarBtn'
-)
-.addEventListener('click',()=>{
-
+document.getElementById('toggleSidebarBtn').addEventListener('click',()=>{
   sidebar.classList.toggle('hidden');
-
   app.classList.toggle('fullscreen');
-
 });
 
-document.getElementById('deleteWallBtn')
-.addEventListener('click',()=>{
+// ¡NUEVO! Evento del botón dibujar pared que faltaba en tu código original
+document.getElementById('drawWallBtn').addEventListener('click',()=>{
+  drawingWall = true;
+  scalingMode = false;
+  placingAp = false;
+  wallPoints = [];
+  document.getElementById('wallStatus').innerText = "Dibujando pared (Haz 2 clicks)...";
+});
 
+document.getElementById('deleteWallBtn').addEventListener('click',()=>{
   if(selectedWallIndex === null){
-
-    alert(
-      'Selecciona una pared'
-    );
-
+    alert('Selecciona una pared en el mapa haciendo click sobre ella primero.');
     return;
   }
-
-  walls.splice(
-    selectedWallIndex,
-    1
-  );
-
+  walls.splice(selectedWallIndex, 1);
   selectedWallIndex = null;
-
-  document.getElementById('wallStatus')
-  .innerText =
-    `Paredes: ${walls.length}`;
-
+  document.getElementById('wallStatus').innerText = `Paredes: ${walls.length}`;
+  cacheValido = false; 
   draw();
-
 });
 
-document.getElementById('zoomInBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('zoomInBtn').addEventListener('click',()=>{
   zoom += 0.1;
-
-  if(zoom > MAX_ZOOM){
-    zoom = MAX_ZOOM;
-  }
-
+  if(zoom > MAX_ZOOM) zoom = MAX_ZOOM;
   applyZoom();
-
 });
 
-document.getElementById('zoomOutBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('zoomOutBtn').addEventListener('click',()=>{
   zoom -= 0.1;
-
-  if(zoom < MIN_ZOOM){
-    zoom = MIN_ZOOM;
-  }
-
+  if(zoom < MIN_ZOOM) zoom = MIN_ZOOM;
   applyZoom();
-
 });
 
-document.getElementById('resetZoomBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('resetZoomBtn').addEventListener('click',()=>{
   zoom = 1;
-
   applyZoom();
-
 });
 
-document.getElementById('mapInput')
-.addEventListener('change',e=>{
-
+document.getElementById('mapInput').addEventListener('change',e=>{
   const file = e.target.files[0];
   if(!file) return;
 
   const reader = new FileReader();
-
   reader.onload = evt=>{
-
     mapImage = new Image();
-
     mapImage.onload = ()=>{
-
       resizeCanvasToImage(mapImage);
-
-      document.getElementById('mapStatus').innerText =
-        `Mapa cargado: ${file.name}`;
-
+      document.getElementById('mapStatus').innerText = `Mapa: ${file.name}`;
     };
-
     mapImage.src = evt.target.result;
-
   };
-
   reader.readAsDataURL(file);
-
 });
 
-document.getElementById('scaleModeBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('scaleModeBtn').addEventListener('click',()=>{
   scalingMode=true;
   placingAp=false;
+  drawingWall=false;
   scalePoints=[];
-
-  alert('Selecciona dos puntos');
-
+  alert('Haz click en dos puntos conocidos del plano para establecer la escala.');
 });
 
-document.getElementById('placeApBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('placeApBtn').addEventListener('click',()=>{
   placingAp=true;
   scalingMode=false;
-
-  alert('Haz click en el mapa');
-
+  drawingWall=false;
+  alert('Haz un click en cualquier lugar del mapa para colocar el Access Point.');
 });
 
-canvas.addEventListener(
-  'mousedown',
-  e=>{
+// Eventos de ratón del Canvas (Arrastrar y Soltar / Clicks)
+canvas.addEventListener('mousedown', e=>{
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / zoom;
+  const y = (e.clientY - rect.top) / zoom;
 
-    const rect =
-      canvas.getBoundingClientRect();
+  const clickedAp = findAPAtPosition(x,y);
+  const clickedWallIndex = findWallAtPosition(x,y);
 
-    const x =
-      (e.clientX - rect.left) / zoom;
-
-    const y =
-      (e.clientY - rect.top) / zoom;
-
-    const clickedAp =
-      findAPAtPosition(x,y);
-
-    const clickedWallIndex =
-  findWallAtPosition(x,y);
-
-if(clickedWallIndex !== null){
-
-  draggingWall =
-    walls[clickedWallIndex];
-
-  wallDragStartX = x;
-  wallDragStartY = y;
-
-  selectedWallIndex =
-    clickedWallIndex;
-
-  draw();
-
-  return;
-
-}
-
-    if(clickedAp){
-
-      draggingAp = clickedAp;
-
-      dragOffsetX =
-        x - clickedAp.x;
-
-      dragOffsetY =
-        y - clickedAp.y;
-
-    }
-
-  }
-);
-
-canvas.addEventListener(
-  'mousemove',
-  e=>{
-
-    if(!draggingAp && !draggingWall){
-  return;
-}
-
-    const rect =
-      canvas.getBoundingClientRect();
-
-    const x =
-      (e.clientX - rect.left) / zoom;
-
-    const y =
-      (e.clientY - rect.top) / zoom;
-
-if(draggingWall){
-
-  const dx =
-    x - wallDragStartX;
-
-  const dy =
-    y - wallDragStartY;
-
-  draggingWall.x1 += dx;
-  draggingWall.y1 += dy;
-
-  draggingWall.x2 += dx;
-  draggingWall.y2 += dy;
-
-  wallDragStartX = x;
-  wallDragStartY = y;
-
-  draw();
-
-  return;
-
-}
-
-    draggingAp.x =
-      x - dragOffsetX;
-
-    draggingAp.y =
-      y - dragOffsetY;
-
+  if(clickedWallIndex !== null && !drawingWall && !scalingMode && !placingAp){
+    draggingWall = walls[clickedWallIndex];
+    wallDragStartX = x;
+    wallDragStartY = y;
+    selectedWallIndex = clickedWallIndex;
     draw();
-
-    renderAPList();
-
+    return;
   }
-);
 
-canvas.addEventListener(
-  'mouseup',
-  ()=>{
-
-    draggingWall = null;
-    draggingAp = null;
-
+  if(clickedAp && !drawingWall && !scalingMode && !placingAp){
+    draggingAp = clickedAp;
+    dragOffsetX = x - clickedAp.x;
+    dragOffsetY = y - clickedAp.y;
+    selectedApId = clickedAp.id;
+    editAP(clickedAp.id);
   }
-);
+});
 
-canvas.addEventListener('click',e=>{
+canvas.addEventListener('mousemove', e=>{
+  if(!draggingAp && !draggingWall) return;
 
   const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / zoom;
+  const y = (e.clientY - rect.top) / zoom;
 
-  const x =
-  (e.clientX - rect.left) / zoom;
+  if(draggingWall){
+    const dx = x - wallDragStartX;
+    const dy = y - wallDragStartY;
 
-const y =
-  (e.clientY - rect.top) / zoom;
+    draggingWall.x1 += dx; draggingWall.y1 += dy;
+    draggingWall.x2 += dx; draggingWall.y2 += dy;
 
-  if(drawingWall){
-
-    wallPoints.push({x,y});
-
-  if(wallPoints.length===2){
-
-    walls.push({
-
-      x1: wallPoints[0].x,
-      y1: wallPoints[0].y,
-
-      x2: wallPoints[1].x,
-      y2: wallPoints[1].y,
-
-      material:
-        document.getElementById(
-          'wallMaterial'
-        ).value
-
-    });
-
-    drawingWall = false;
-
-    document.getElementById('wallStatus')
-    .innerText =
-      `Paredes: ${walls.length}`;
-
+    wallDragStartX = x;
+    wallDragStartY = y;
+    cacheValido = false; // El mapa de calor debe recalcularse al mover el muro
+    draw();
+    return;
   }
 
-  draw();
+  if(draggingAp){
+    draggingAp.x = x - dragOffsetX;
+    draggingAp.y = y - dragOffsetY;
+    cacheValido = false; // El mapa de calor debe recalcularse al mover el AP
+    draw();
+    renderAPList();
+  }
+});
 
-  return;
-}
+canvas.addEventListener('mouseup', ()=>{
+  draggingWall = null;
+  draggingAp = null;
+});
+
+canvas.addEventListener('click',e=>{
+  const rect = canvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / zoom;
+  const y = (e.clientY - rect.top) / zoom;
+
+  if(drawingWall){
+    wallPoints.push({x,y});
+    if(wallPoints.length===1){
+       document.getElementById('wallStatus').innerText = "Haz el segundo click...";
+    }
+    if(wallPoints.length===2){
+      walls.push({
+        x1: wallPoints[0].x, y1: wallPoints[0].y,
+        x2: wallPoints[1].x, y2: wallPoints[1].y,
+        material: document.getElementById('wallMaterial').value
+      });
+      drawingWall = false;
+      document.getElementById('wallStatus').innerText = `Paredes: ${walls.length}`;
+      cacheValido = false; 
+    }
+    draw();
+    return;
+  }
 
   if(scalingMode){
-
     scalePoints.push({x,y});
-
     if(scalePoints.length===2){
+      const dx = scalePoints[1].x - scalePoints[0].x;
+      const dy = scalePoints[1].y - scalePoints[0].y;
+      const pixelDistance = Math.sqrt(dx*dx + dy*dy);
+      const realDistance = parseFloat(document.getElementById('realDistance').value);
 
-      const dx =
-        scalePoints[1].x - scalePoints[0].x;
-
-      const dy =
-        scalePoints[1].y - scalePoints[0].y;
-
-      const pixelDistance =
-        Math.sqrt(dx*dx + dy*dy);
-
-      const realDistance =
-        parseFloat(
-          document.getElementById('realDistance').value
-        );
-
-      pixelsPerMeter =
-        pixelDistance / realDistance;
-
-      document.getElementById('scaleStatus').innerText =
-        `${pixelsPerMeter.toFixed(2)} px/m`;
-
+      pixelsPerMeter = pixelDistance / realDistance;
+      document.getElementById('scaleStatus').innerText = `${pixelsPerMeter.toFixed(2)} px/m`;
       scalingMode=false;
+      cacheValido = false;
     }
-
     draw();
     return;
   }
 
   if(!placingAp){
+    const clickedWall = findWallAtPosition(x,y);
+    if(clickedWall !== null){
+      selectedWallIndex = clickedWall;
+      draw();
+      return;
+    }
 
-  const clickedWall =
-    findWallAtPosition(x,y);
-
-  if(clickedWall !== null){
-
-    selectedWallIndex =
-      clickedWall;
-
-    draw();
-
+    const clickedAp = findAPAtPosition(x,y);
+    if(clickedAp) {
+      editAP(clickedAp.id);
+    } else {
+      selectedWallIndex = null; 
+      draw();
+    }
     return;
   }
 
-  const clickedAp =
-    findAPAtPosition(x,y);
-
-  if(clickedAp){
-    editAP(clickedAp.id);
-  }
-
-  draw();
-
-  return;
-}
-
+  // Lógica de inserción de nuevo AP con tus valores empíricos por defecto
   const ap = {
-
     id: crypto.randomUUID(),
-
     enabled:true,
-
-    x,
-    y,
-
-    name:
-      document.getElementById('apName').value || 'AP',
-
-    ip:
-      document.getElementById('apIp').value,
-
-    mac:
-      document.getElementById('apMac').value,
-
-    model:
-      document.getElementById('apModel').value,
-
-    area:
-      document.getElementById('apArea').value,
-
+    x, y,
+    name: document.getElementById('apName').value || 'AP',
+    ip: document.getElementById('apIp').value,
+    mac: document.getElementById('apMac').value,
+    model: document.getElementById('apModel').value,
+    area: document.getElementById('apArea').value,
     signals:{
-
       '2.4':{
-
         up5:parseFloat(document.getElementById('g24_up_5').value || -60),
         down5:parseFloat(document.getElementById('g24_down_5').value || -60),
         left5:parseFloat(document.getElementById('g24_left_5').value || -60),
         right5:parseFloat(document.getElementById('g24_right_5').value || -60),
-
         up10:parseFloat(document.getElementById('g24_up_10').value || -75),
         down10:parseFloat(document.getElementById('g24_down_10').value || -75),
         left10:parseFloat(document.getElementById('g24_left_10').value || -75),
         right10:parseFloat(document.getElementById('g24_right_10').value || -75)
-
       },
-
       '5':{
-
         up5:parseFloat(document.getElementById('g5_up_5').value || -65),
         down5:parseFloat(document.getElementById('g5_down_5').value || -65),
         left5:parseFloat(document.getElementById('g5_left_5').value || -65),
         right5:parseFloat(document.getElementById('g5_right_5').value || -65),
-
         up10:parseFloat(document.getElementById('g5_up_10').value || -80),
         down10:parseFloat(document.getElementById('g5_down_10').value || -80),
         left10:parseFloat(document.getElementById('g5_left_10').value || -80),
         right10:parseFloat(document.getElementById('g5_right_10').value || -80)
-
       }
-
     }
-
   };
 
   aps.push(ap);
-
   placingAp=false;
-
+  cacheValido = false; 
   draw();
   renderAPList();
-
 });
 
-document.getElementById('saveApBtn')
-.addEventListener('click',()=>{
-
+document.getElementById('saveApBtn').addEventListener('click',()=>{
   if(!selectedApId){
-    alert('Selecciona un AP');
+    alert('Selecciona un AP de la lista primero para actualizarlo.');
     return;
   }
 
-  const ap =
-    aps.find(a=>a.id===selectedApId);
-
+  const ap = aps.find(a=>a.id===selectedApId);
   if(!ap) return;
 
-  ap.name =
-    document.getElementById('apName').value;
-
-  ap.ip =
-    document.getElementById('apIp').value;
-
-  ap.mac =
-    document.getElementById('apMac').value;
-
-  ap.model =
-    document.getElementById('apModel').value;
-
-  ap.area =
-    document.getElementById('apArea').value;
+  ap.name = document.getElementById('apName').value;
+  ap.ip = document.getElementById('apIp').value;
+  ap.mac = document.getElementById('apMac').value;
+  ap.model = document.getElementById('apModel').value;
+  ap.area = document.getElementById('apArea').value;
 
   ap.signals['2.4'] = {
-
-    up5:parseFloat(document.getElementById('g24_up_5').value || -60),
-    down5:parseFloat(document.getElementById('g24_down_5').value || -60),
-    left5:parseFloat(document.getElementById('g24_left_5').value || -60),
-    right5:parseFloat(document.getElementById('g24_right_5').value || -60),
-
-    up10:parseFloat(document.getElementById('g24_up_10').value || -75),
-    down10:parseFloat(document.getElementById('g24_down_10').value || -75),
-    left10:parseFloat(document.getElementById('g24_left_10').value || -75),
-    right10:parseFloat(document.getElementById('g24_right_10').value || -75)
-
+    up5:parseFloat(document.getElementById('g24_up_5').value),
+    down5:parseFloat(document.getElementById('g24_down_5').value),
+    left5:parseFloat(document.getElementById('g24_left_5').value),
+    right5:parseFloat(document.getElementById('g24_right_5').value),
+    up10:parseFloat(document.getElementById('g24_up_10').value),
+    down10:parseFloat(document.getElementById('g24_down_10').value),
+    left10:parseFloat(document.getElementById('g24_left_10').value),
+    right10:parseFloat(document.getElementById('g24_right_10').value)
   };
 
   ap.signals['5'] = {
-
-    up5:parseFloat(document.getElementById('g5_up_5').value || -65),
-    down5:parseFloat(document.getElementById('g5_down_5').value || -65),
-    left5:parseFloat(document.getElementById('g5_left_5').value || -65),
-    right5:parseFloat(document.getElementById('g5_right_5').value || -65),
-
-    up10:parseFloat(document.getElementById('g5_up_10').value || -80),
-    down10:parseFloat(document.getElementById('g5_down_10').value || -80),
-    left10:parseFloat(document.getElementById('g5_left_10').value || -80),
-    right10:parseFloat(document.getElementById('g5_right_10').value || -80)
-
+    up5:parseFloat(document.getElementById('g5_up_5').value),
+    down5:parseFloat(document.getElementById('g5_down_5').value),
+    left5:parseFloat(document.getElementById('g5_left_5').value),
+    right5:parseFloat(document.getElementById('g5_right_5').value),
+    up10:parseFloat(document.getElementById('g5_up_10').value),
+    down10:parseFloat(document.getElementById('g5_down_10').value),
+    left10:parseFloat(document.getElementById('g5_left_10').value),
+    right10:parseFloat(document.getElementById('g5_right_10').value)
   };
 
+  cacheValido = false; 
   draw();
   renderAPList();
-
-  alert('AP actualizado');
-
+  alert('Datos del AP actualizados correctamente.');
 });
 
-document.getElementById('render24')
-.addEventListener('click',()=>{
+document.getElementById('render24').addEventListener('click',()=>{
   currentBand='2.4';
+  cacheValido = false; 
   draw();
 });
 
-document.getElementById('render5')
-.addEventListener('click',()=>{
+document.getElementById('render5').addEventListener('click',()=>{
   currentBand='5';
+  cacheValido = false; 
   draw();
 });
 
-document.getElementById('clearBtn')
-.addEventListener('click',()=>{
-
-  if(!confirm('¿Eliminar todos los APs?')) return;
-
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  if(!confirm('¿Seguro que deseas eliminar absolutamente todos los APs?')) return;
   aps=[];
-
+  selectedApId = null;
+  document.getElementById('selectedApStatus').innerText = "Ningún AP seleccionado";
+  cacheValido = false; 
   draw();
   renderAPList();
-
 });
 
-document.getElementById('exportBtn')
-.addEventListener('click',()=>{
-
-  const data = {
-  aps,
-  walls,
-  pixelsPerMeter
-};
-
-  const blob = new Blob(
-    [JSON.stringify(data,null,2)],
-    {type:'application/json'}
-  );
-
+// Importaciones y Exportaciones
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const data = { aps, walls, pixelsPerMeter };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
-
   const a = document.createElement('a');
-
   a.href = url;
-  a.download = 'wifi_heatmap_project.json';
-
+  a.download = 'wifi_heatmap_data.json';
   a.click();
-
   URL.revokeObjectURL(url);
-
 });
 
-document.getElementById('exportExcelBtn')
-.addEventListener('click', () => {
-
+document.getElementById('exportExcelBtn').addEventListener('click', () => {
   const rows = [];
-
   aps.forEach(ap => {
-
     rows.push({
-
-      Nombre: ap.name,
-
-      "2.4GHz ↑ 5m": ap.signals['2.4'].up5,
-      "2.4GHz ↓ 5m": ap.signals['2.4'].down5,
-      "2.4GHz ← 5m": ap.signals['2.4'].left5,
-      "2.4GHz → 5m": ap.signals['2.4'].right5,
-
-      "2.4GHz ↑ 10m": ap.signals['2.4'].up10,
-      "2.4GHz ↓ 10m": ap.signals['2.4'].down10,
-      "2.4GHz ← 10m": ap.signals['2.4'].left10,
-      "2.4GHz → 10m": ap.signals['2.4'].right10,
-
-      "5GHz ↑ 5m": ap.signals['5'].up5,
-      "5GHz ↓ 5m": ap.signals['5'].down5,
-      "5GHz ← 5m": ap.signals['5'].left5,
-      "5GHz → 5m": ap.signals['5'].right5,
-
-      "5GHz ↑ 10m": ap.signals['5'].up10,
-      "5GHz ↓ 10m": ap.signals['5'].down10,
-      "5GHz ← 10m": ap.signals['5'].left10,
-      "5GHz → 10m": ap.signals['5'].right10
-
+      Nombre: ap.name, Area: ap.area, IP: ap.ip, MAC: ap.mac, Modelo: ap.model,
+      "2.4GHz U 5m": ap.signals['2.4'].up5, "2.4GHz D 5m": ap.signals['2.4'].down5,
+      "2.4GHz L 5m": ap.signals['2.4'].left5, "2.4GHz R 5m": ap.signals['2.4'].right5,
+      "2.4GHz U 10m": ap.signals['2.4'].up10, "2.4GHz D 10m": ap.signals['2.4'].down10,
+      "2.4GHz L 10m": ap.signals['2.4'].left10, "2.4GHz R 10m": ap.signals['2.4'].right10,
+      "5GHz U 5m": ap.signals['5'].up5, "5GHz D 5m": ap.signals['5'].down5,
+      "5GHz L 5m": ap.signals['5'].left5, "5GHz R 5m": ap.signals['5'].right5,
+      "5GHz U 10m": ap.signals['5'].up10, "5GHz D 10m": ap.signals['5'].down10,
+      "5GHz L 10m": ap.signals['5'].left10, "5GHz R 10m": ap.signals['5'].right10
     });
-
   });
 
   const worksheet = XLSX.utils.json_to_sheet(rows);
   const workbook = XLSX.utils.book_new();
-
-  XLSX.utils.book_append_sheet(
-    workbook,
-    worksheet,
-    'Access Points'
-  );
-
-  XLSX.writeFile(
-    workbook,
-    'wifi_heatmap_aps.xlsx'
-  );
-
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Access Points');
+  XLSX.writeFile(workbook, 'wifi_heatmap_report.xlsx');
 });
 
-document.getElementById('importInput')
-.addEventListener('change',e=>{
-
+document.getElementById('importInput').addEventListener('change',e=>{
   const file = e.target.files[0];
   if(!file) return;
 
   const reader = new FileReader();
-
   reader.onload = evt=>{
+    try {
+      const data = JSON.parse(evt.target.result);
+      aps = data.aps || [];
+      aps.forEach(ap=>{ if(ap.enabled === undefined) ap.enabled = true; });
+      pixelsPerMeter = data.pixelsPerMeter || null;
+      walls = data.walls || [];
 
-    const data = JSON.parse(evt.target.result);
-
-    aps = data.aps || [];
-
-    aps.forEach(ap=>{
-
-      if(ap.enabled === undefined){
-        ap.enabled = true;
+      if(pixelsPerMeter){
+        document.getElementById('scaleStatus').innerText = `${pixelsPerMeter.toFixed(2)} px/m`;
       }
+      document.getElementById('wallStatus').innerText = `Paredes: ${walls.length}`;
 
-    });
-
-    pixelsPerMeter = data.pixelsPerMeter || null;
-    walls = data.walls || [];
-
-    renderAPList();
-    draw();
-
+      renderAPList();
+      cacheValido = false; 
+      draw();
+    } catch(err) {
+      alert("Error al parsear el archivo JSON.");
+    }
   };
-
   reader.readAsText(file);
-
 });
-
 </script>
 
 </body>
